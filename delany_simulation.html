@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delany &amp; Co. — Live Floor Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --cream: #F7F3EC;
+    --charcoal: #111111;
+    --slate: #1E1E1E;
+    --panel: #181818;
+    --muted: #6B6560;
+    --muted-light: #9A9088;
+    --danger: #8B2E2E;
+    --success: #2E5E3E;
+    --border: rgba(201,168,76,0.18);
+    --border-soft: rgba(255,255,255,0.06);
+    --bubble-sim: #1E1C18;
+    --bubble-user: rgba(201,168,76,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Cormorant Garamond', Georgia, serif; background: var(--charcoal); color: var(--cream); overflow: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+  .screen { display: none; position: fixed; inset: 0; z-index: 1; animation: screenIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .screen.active { display: flex; flex-direction: column; }
+  @keyframes screenIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  /* SETUP */
+  #screen-setup { align-items: center; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+  .setup-card { width: 100%; max-width: 480px; display: flex; flex-direction: column; }
+  .setup-logo { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.35em; color: var(--gold); text-transform: uppercase; text-align: center; margin-bottom: 48px; }
+  .setup-ornament { width: 1px; height: 48px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); margin: 0 auto 32px; }
+  .setup-title { font-size: clamp(2rem,5vw,3.2rem); font-weight: 300; line-height: 1.15; text-align: center; margin-bottom: 12px; }
+  .setup-title em { font-style: italic; color: var(--gold-light); }
+  .setup-sub { font-size: 1rem; font-weight: 300; color: var(--muted-light); text-align: center; line-height: 1.6; margin-bottom: 40px; }
+  .setup-context { background: rgba(201,168,76,0.06); border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 32px; }
+  .setup-context-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+  .setup-context p { font-size: 0.95rem; color: var(--muted-light); line-height: 1.6; font-style: italic; }
+  .btn-begin { background: var(--gold); color: var(--charcoal); border: none; padding: 15px 40px; font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; width: 100%; transition: background 0.2s, transform 0.15s; }
+  .btn-begin:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-begin:disabled { background: var(--slate); color: var(--muted); cursor: not-allowed; transform: none; }
+  .setup-error { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #C0544A; margin-top: 10px; letter-spacing: 0.05em; display: none; }
+
+  /* SIM */
+  #screen-sim { flex-direction: column; height: 100vh; overflow: hidden; }
+  .sim-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border-soft); background: rgba(17,17,17,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
+  .sim-logo { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; }
+  .sim-status { display: flex; align-items: center; gap: 8px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.6); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  .status-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--muted-light); text-transform: uppercase; }
+  .risk-indicator { display: flex; align-items: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+  .risk-bar-wrap { width: 64px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .risk-bar-fill { height: 100%; width: 15%; background: #4CAF50; border-radius: 2px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1), background 0.5s; }
+  .scene-banner { background: rgba(201,168,76,0.05); border-bottom: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .scene-tag { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; white-space: nowrap; }
+  .scene-divider { width: 1px; height: 14px; background: var(--border); }
+  .scene-desc { font-size: 0.82rem; color: var(--muted-light); font-style: italic; }
+  .chat-container { flex: 1; overflow-y: auto; padding: 28px 20px; display: flex; flex-direction: column; gap: 0; scroll-behavior: smooth; }
+  .chat-container::-webkit-scrollbar { width: 4px; }
+  .chat-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .msg-wrap { display: flex; flex-direction: column; margin-bottom: 20px; animation: msgIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
+  @keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .msg-wrap.sim { align-items: flex-start; }
+  .msg-wrap.user { align-items: flex-end; }
+  .msg-wrap.system { align-items: center; margin-bottom: 16px; }
+  .msg-sender { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
+  .msg-wrap.sim .msg-sender { color: var(--gold); }
+  .msg-wrap.user .msg-sender { color: var(--muted); }
+  .msg-bubble { max-width: min(640px, 85%); padding: 14px 18px; line-height: 1.7; font-size: 1rem; font-weight: 300; }
+  .msg-wrap.sim .msg-bubble { background: var(--bubble-sim); border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; color: var(--cream); }
+  .msg-wrap.user .msg-bubble { background: var(--bubble-user); border: 1px solid rgba(201,168,76,0.2); border-radius: 8px 0 8px 8px; color: var(--cream); font-style: italic; }
+  .msg-system { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; text-align: center; padding: 6px 16px; border: 1px solid var(--border-soft); background: rgba(255,255,255,0.02); }
+  .typing-wrap { display: none; align-items: flex-start; flex-direction: column; margin-bottom: 20px; }
+  .typing-wrap.visible { display: flex; }
+  .typing-label { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
+  .typing-bubble { background: var(--bubble-sim); border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingBounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-4px); opacity:1; } }
+  .input-area { flex-shrink: 0; padding: 16px 20px 20px; background: rgba(17,17,17,0.97); border-top: 1px solid var(--border-soft); }
+  .input-prompt { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .input-row { display: flex; gap: 10px; align-items: flex-end; }
+  #user-input { flex: 1; background: var(--slate); border: 1px solid var(--border-soft); padding: 13px 16px; font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--cream); resize: none; outline: none; transition: border-color 0.2s; min-height: 50px; max-height: 120px; line-height: 1.5; border-radius: 0; }
+  #user-input:focus { border-color: rgba(201,168,76,0.45); }
+  #user-input::placeholder { color: var(--muted); font-style: italic; }
+  #user-input:disabled { opacity: 0.4; }
+  #send-btn { background: var(--gold); border: none; padding: 13px 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; flex-shrink: 0; height: 50px; }
+  #send-btn:hover { background: var(--gold-light); }
+  #send-btn:disabled { background: var(--slate); cursor: not-allowed; }
+  #send-btn svg { width: 16px; height: 16px; fill: var(--charcoal); }
+  .input-hint { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 8px; display: flex; justify-content: space-between; }
+  .end-sim-link { color: var(--muted); text-decoration: none; cursor: pointer; background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.08em; padding: 0; transition: color 0.2s; }
+  .end-sim-link:hover { color: var(--gold); }
+  .risk-flash { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: transparent; z-index: 999; pointer-events: none; }
+  .risk-flash.danger { background: var(--danger); animation: flashPulse 0.6s ease; }
+  @keyframes flashPulse { 0%,100% { opacity:0; } 50% { opacity:1; } }
+
+  /* DEBRIEF */
+  #screen-debrief { overflow-y: auto; align-items: center; padding: 48px 20px; }
+  #screen-debrief::-webkit-scrollbar { width: 4px; }
+  #screen-debrief::-webkit-scrollbar-thumb { background: var(--border); }
+  .debrief-card { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 32px; }
+  .debrief-header { text-align: center; }
+  .debrief-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; }
+  .debrief-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 300; line-height: 1.2; margin-bottom: 8px; }
+  .debrief-title em { font-style: italic; color: var(--gold-light); }
+  .debrief-ornament { display: flex; align-items: center; gap: 16px; margin: 20px 0; }
+  .debrief-ornament-line { flex: 1; height: 1px; background: var(--border); }
+  .debrief-ornament-diamond { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); }
+  .debrief-section { background: var(--panel); border: 1px solid var(--border-soft); padding: 24px 28px; }
+  .debrief-section-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft); }
+  .debrief-section.well .debrief-section-label { color: #6BAF7E; }
+  .debrief-section.missed .debrief-section-label { color: #C0544A; }
+  .debrief-section.expert .debrief-section-label { color: var(--gold); }
+  .debrief-section.signals .debrief-section-label { color: var(--muted-light); }
+  .debrief-section p, .debrief-section ul { font-size: 0.95rem; color: var(--muted-light); line-height: 1.75; font-weight: 300; }
+  .debrief-section ul { padding-left: 0; list-style: none; }
+  .debrief-section ul li { padding: 5px 0 5px 20px; position: relative; }
+  .debrief-section ul li::before { content: '—'; position: absolute; left: 0; color: var(--border); }
+  .debrief-loading { display: flex; align-items: center; gap: 14px; padding: 20px 0; }
+  .debrief-loading-dots { display: flex; gap: 5px; }
+  .debrief-loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s infinite; }
+  .debrief-loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .debrief-loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  .debrief-loading-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .debrief-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .btn-gold { background: var(--gold); color: var(--charcoal); border: none; padding: 13px 32px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--muted-light); border: 1px solid var(--border); padding: 13px 32px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  @media (max-width: 600px) {
+    .sim-topbar { padding: 12px 16px; }
+    .scene-banner { padding: 8px 16px; }
+    .chat-container { padding: 20px 14px; }
+    .input-area { padding: 12px 14px 16px; }
+    .msg-bubble { font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+<div class="risk-flash" id="risk-flash"></div>
+
+<!-- SETUP -->
+<div class="screen active" id="screen-setup">
+  <div class="setup-card">
+    <div class="setup-logo">Delany &amp; Co.</div>
+    <div class="setup-ornament"></div>
+    <h1 class="setup-title">Live Floor<br><em>Simulation</em></h1>
+    <p class="setup-sub">An AI-powered loss prevention training exercise. You are a sales associate. The floor is live. Respond as you would in the moment.</p>
+    <div class="setup-context">
+      <div class="setup-context-label">Scenario Briefing</div>
+      <p>Valentine&#39;s Day rush. High customer volume. Peak theft season. You will be tested on situational awareness, protocol discipline, and communication under pressure. There are no multiple-choice answers.</p>
+    </div>
+    <button class="btn-begin" id="begin-btn" onclick="beginSimulation()">Enter the Floor</button>
+    <p class="setup-error" id="setup-error"></p>
+  </div>
+</div>
+
+<!-- SIMULATION -->
+<div class="screen" id="screen-sim">
+  <div class="sim-topbar">
+    <div class="sim-logo">Delany &amp; Co.</div>
+    <div class="sim-status">
+      <div class="status-dot"></div>
+      <span class="status-label">Floor Live</span>
+    </div>
+    <div class="risk-indicator">
+      <span id="risk-label" style="color:#4CAF50;">LOW</span>
+      <div class="risk-bar-wrap"><div class="risk-bar-fill" id="risk-bar"></div></div>
+    </div>
+  </div>
+  <div class="scene-banner">
+    <span class="scene-tag">&#128205; Counter 3 — Diamond Display</span>
+    <div class="scene-divider"></div>
+    <span class="scene-desc">Valentine&#39;s Day — 14:30 — High Floor Volume</span>
+  </div>
+  <div class="chat-container" id="chat-container">
+    <div class="typing-wrap" id="typing-indicator">
+      <div class="typing-label">Floor Simulation</div>
+      <div class="typing-bubble">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-prompt">Your response — speak or act as if you are on the floor</div>
+    <div class="input-row">
+      <textarea id="user-input" placeholder="What do you say or do?" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-hint">
+      <span>Enter to send — Shift+Enter for new line</span>
+      <button class="end-sim-link" onclick="endSimulation()">End &amp; Get Debrief &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEBRIEF -->
+<div class="screen" id="screen-debrief">
+  <div class="debrief-card">
+    <div class="debrief-header">
+      <div class="debrief-eyebrow">Simulation Complete</div>
+      <h2 class="debrief-title">Post-Incident<br><em>Debrief</em></h2>
+      <div class="debrief-ornament">
+        <div class="debrief-ornament-line"></div>
+        <div class="debrief-ornament-diamond"></div>
+        <div class="debrief-ornament-line"></div>
+      </div>
+      <p style="font-size:0.95rem;color:var(--muted-light);line-height:1.6;font-weight:300;">Your performance has been evaluated against Delany &amp; Co. loss prevention standards.</p>
+    </div>
+    <div id="debrief-content">
+      <div class="debrief-loading">
+        <div class="debrief-loading-dots">
+          <div class="debrief-loading-dot"></div>
+          <div class="debrief-loading-dot"></div>
+          <div class="debrief-loading-dot"></div>
+        </div>
+        <span class="debrief-loading-text">Generating expert debrief&#8230;</span>
+      </div>
+    </div>
+    <div class="debrief-actions">
+      <button class="btn-gold" onclick="restartSim()">Run Again</button>
+      <button class="btn-outline" onclick="window.print()">Print Report</button>
+    </div>
+    <p style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;text-align:center;margin-top:8px;">Delany &amp; Co. — Loss Prevention Division — 2025</p>
+  </div>
+</div>
+
+<script>
+const GEMINI_MODEL = 'gemini-2.0-flash';
+let history = [];
+let riskLevel = 0;
+
+const SYSTEM_PROMPT = `You are a real-time simulation engine for retail loss prevention training in a luxury jewelry store called Delany & Co. The user plays a sales associate during Valentine's Day rush.
+
+RULES:
+- Never present multiple-choice options. User responds in free text.
+- Keep responses concise and vivid: 2-5 sentences. Use sensory and behavioral cues.
+- React dynamically to user actions. Escalate or de-escalate risk based on choices.
+- Roleplay all characters: customers, accomplices, colleagues.
+- Introduce subtle suspicious cues: eye contact avoidance, unusual positioning, distraction attempts.
+- Occasionally add time pressure.
+- Never break immersion unless user asks to stop.
+- At the end of EVERY response, output exactly: RISK_LEVEL: [0-100]
+  0=no risk, 100=theft occurring. Increase for bad protocol, decrease for good awareness.
+- Only when user asks to end or requests feedback: output SIMULATION_COMPLETE on its own line, then output ONLY this JSON (nothing else before or after the JSON):
+{"well":["point","point"],"missed":["point","point"],"signals":["signal","signal"],"expert":"2-3 sentence expert perspective."}
+
+START with: A customer approaches asking to see a diamond solitaire ring. As you move to unlock the display case, you notice another individual lingering nearby holding a phone slightly raised, not interacting, but clearly observing the display area. The store is busy and multiple customers are waiting. What do you do?`;
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = '';
+}
+
+async function callGemini(msgs) {
+  const contents = msgs.length > 0 ? msgs : [{ role: 'user', parts: [{ text: 'Begin.' }] }];
+  const res = await fetch('/.netlify/functions/gemini', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: contents,
+      generationConfig: { maxOutputTokens: 600, temperature: 0.85 }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(function() { return {}; });
+    throw new Error(err.error && err.error.message ? err.error.message : 'HTTP ' + res.status);
+  }
+  const data = await res.json();
+  return (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) ? data.candidates[0].content.parts[0].text : '';
+}
+
+function parseResponse(text) {
+  const match = text.match(/RISK_LEVEL:\s*(\d+)/);
+  const risk = match ? parseInt(match[1]) : null;
+  const clean = text.replace(/RISK_LEVEL:\s*\d+\n?/g, '').replace(/SIMULATION_COMPLETE\n?/g, '').trim();
+  return { text: clean, risk: risk };
+}
+
+function addMsg(type, text) {
+  const container = document.getElementById('chat-container');
+  const indicator = document.getElementById('typing-indicator');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ' + type;
+  if (type === 'system') {
+    wrap.innerHTML = '<div class="msg-system">' + esc(text) + '</div>';
+  } else {
+    const sender = type === 'sim' ? 'Floor Simulation' : 'You';
+    wrap.innerHTML = '<div class="msg-sender">' + sender + '</div><div class="msg-bubble">' + esc(text) + '</div>';
+  }
+  container.insertBefore(wrap, indicator);
+  setTimeout(function() { container.scrollTop = container.scrollHeight; }, 60);
+}
+
+function setTyping(on) {
+  const el = document.getElementById('typing-indicator');
+  el.className = 'typing-wrap' + (on ? ' visible' : '');
+  if (on) setTimeout(function() { const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight; }, 60);
+}
+
+function setUI(disabled) {
+  document.getElementById('user-input').disabled = disabled;
+  document.getElementById('send-btn').disabled = disabled;
+}
+
+function updateRisk(level) {
+  if (level === null || level === undefined) return;
+  riskLevel = level;
+  const bar = document.getElementById('risk-bar');
+  const label = document.getElementById('risk-label');
+  bar.style.width = level + '%';
+  if (level < 30) {
+    bar.style.background = '#4CAF50'; label.style.color = '#4CAF50'; label.textContent = 'LOW';
+  } else if (level < 65) {
+    bar.style.background = '#C9A84C'; label.style.color = '#C9A84C'; label.textContent = 'MED';
+  } else {
+    bar.style.background = '#C0544A'; label.style.color = '#C0544A'; label.textContent = 'HIGH';
+    const flash = document.getElementById('risk-flash');
+    flash.className = 'risk-flash danger';
+    setTimeout(function() { flash.className = 'risk-flash'; }, 700);
+  }
+}
+
+function esc(text) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(text));
+  return d.innerHTML;
+}
+
+async function beginSimulation() {
+  const btn = document.getElementById('begin-btn');
+  const errEl = document.getElementById('setup-error');
+  btn.disabled = true;
+  btn.textContent = 'Entering the floor...';
+  errEl.style.display = 'none';
+  history = [];
+  goTo('screen-sim');
+  addMsg('system', 'Simulation Active — Valentine\'s Day — 14:30');
+  setTyping(true);
+  setUI(true);
+  try {
+    const response = await callGemini([]);
+    const parsed = parseResponse(response);
+    history = [
+      { role: 'user', parts: [{ text: 'Begin.' }] },
+      { role: 'model', parts: [{ text: response }] }
+    ];
+    setTyping(false);
+    addMsg('sim', parsed.text);
+    updateRisk(parsed.risk !== null ? parsed.risk : 10);
+    setUI(false);
+    document.getElementById('user-input').focus();
+  } catch(e) {
+    setTyping(false);
+    btn.disabled = false;
+    btn.textContent = 'Enter the Floor';
+    goTo('screen-setup');
+    errEl.textContent = 'Connection error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+  setUI(true);
+  addMsg('user', text);
+  history.push({ role: 'user', parts: [{ text: text }] });
+  setTyping(true);
+  try {
+    const response = await callGemini(history);
+    history.push({ role: 'model', parts: [{ text: response }] });
+    if (response.indexOf('SIMULATION_COMPLETE') !== -1) {
+      setTyping(false);
+      generateDebrief(response);
+      return;
+    }
+    const parsed = parseResponse(response);
+    setTyping(false);
+    addMsg('sim', parsed.text);
+    updateRisk(parsed.risk !== null ? parsed.risk : riskLevel);
+  } catch(e) {
+    setTyping(false);
+    addMsg('sim', '[ Connection error: ' + e.message + ' ]');
+  }
+  setUI(false);
+  document.getElementById('user-input').focus();
+}
+
+async function endSimulation() {
+  setUI(true);
+  setTyping(true);
+  history.push({ role: 'user', parts: [{ text: 'End simulation. Give me the full debrief now.' }] });
+  try {
+    const response = await callGemini(history);
+    setTyping(false);
+    generateDebrief(response);
+  } catch(e) {
+    setTyping(false);
+    generateDebrief('');
+  }
+}
+
+function generateDebrief(responseText) {
+  goTo('screen-debrief');
+  const contentEl = document.getElementById('debrief-content');
+  try {
+    const jsonMatch = responseText.match(/\{[\s\S]*"well"[\s\S]*"expert"[\s\S]*\}/);
+    if (jsonMatch) {
+      renderDebrief(JSON.parse(jsonMatch[0]));
+      return;
+    }
+  } catch(e) {}
+  // Fallback: ask Gemini directly
+  const prompt = 'Based on this training simulation, provide a JSON debrief with keys: well (array), missed (array), signals (array), expert (string). Output JSON only.\n\n' +
+    history.map(function(m) { return m.role.toUpperCase() + ': ' + (m.parts && m.parts[0] ? m.parts[0].text : ''); }).join('\n\n');
+  callGemini([{ role: 'user', parts: [{ text: prompt }] }])
+    .then(function(res) {
+      try {
+        const match = res.match(/\{[\s\S]*\}/);
+        if (match) { renderDebrief(JSON.parse(match[0])); return; }
+      } catch(e) {}
+      renderDebrief({ well: ['You completed the simulation.'], missed: ['Review your session for areas to improve.'], signals: ['Multiple risk signals were introduced during the scenario.'], expert: 'Review the scenario carefully and retake the simulation to improve your score.' });
+    })
+    .catch(function() {
+      renderDebrief({ well: ['You completed the simulation.'], missed: ['Review your session for areas to improve.'], signals: ['Multiple risk signals were introduced during the scenario.'], expert: 'Review the scenario carefully and retake the simulation to improve your score.' });
+    });
+}
+
+function renderDebrief(data) {
+  const makeList = function(items) { return (items || []).map(function(i) { return '<li>' + esc(i) + '</li>'; }).join(''); };
+  document.getElementById('debrief-content').innerHTML =
+    '<div class="debrief-section well"><div class="debrief-section-label">&#10003; What You Did Well</div><ul>' + makeList(data.well) + '</ul></div>' +
+    '<div class="debrief-section missed"><div class="debrief-section-label">&#10007; What You Missed</div><ul>' + makeList(data.missed) + '</ul></div>' +
+    '<div class="debrief-section signals"><div class="debrief-section-label">&#9672; Risk Signals Present</div><ul>' + makeList(data.signals) + '</ul></div>' +
+    '<div class="debrief-section expert"><div class="debrief-section-label">&#10022; Expert Perspective</div><p>' + esc(data.expert || '') + '</p></div>';
+}
+
+function restartSim() {
+  history = [];
+  riskLevel = 0;
+  updateRisk(0);
+  const container = document.getElementById('chat-container');
+  const indicator = document.getElementById('typing-indicator');
+  Array.from(container.children).forEach(function(c) { if (c !== indicator) container.removeChild(c); });
+  indicator.className = 'typing-wrap';
+  document.getElementById('debrief-content').innerHTML = '<div class="debrief-loading"><div class="debrief-loading-dots"><div class="debrief-loading-dot"></div><div class="debrief-loading-dot"></div><div class="debrief-loading-dot"></div></div><span class="debrief-loading-text">Generating expert debrief...</span></div>';
+  document.getElementById('begin-btn').disabled = false;
+  document.getElementById('begin-btn').textContent = 'Enter the Floor';
+  beginSimulation();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+</script>
+</body>
+</html>
