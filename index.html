@@ -1,11 +1,12 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delany &amp; Co. — Live Floor Simulation</title>
+<title>Delany &amp; Co. — Loss Prevention Simulation</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -17,16 +18,17 @@
     --panel: #181818;
     --muted: #6B6560;
     --muted-light: #9A9088;
-    --danger: #8B2E2E;
-    --success: #2E5E3E;
     --border: rgba(201,168,76,0.18);
     --border-soft: rgba(255,255,255,0.06);
-    --bubble-sim: #1E1C18;
+    --bubble-jordan: #1a1f1a;
+    --bubble-customer: #1a1a22;
+    --bubble-manager: #1f1a1a;
     --bubble-user: rgba(201,168,76,0.12);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; font-family: 'Cormorant Garamond', Georgia, serif; background: var(--charcoal); color: var(--cream); overflow: hidden; }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+
   .screen { display: none; position: fixed; inset: 0; z-index: 1; animation: screenIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
   .screen.active { display: flex; flex-direction: column; }
   @keyframes screenIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -47,18 +49,34 @@
   .btn-begin:disabled { background: var(--slate); color: var(--muted); cursor: not-allowed; transform: none; }
   .setup-error { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #C0544A; margin-top: 10px; letter-spacing: 0.05em; display: none; }
 
-  /* SIM */
-  #screen-sim { flex-direction: column; height: 100vh; overflow: hidden; }
+  /* TRANSITION SPLASH */
+  #screen-transition { align-items: center; justify-content: center; background: var(--charcoal); }
+  .transition-inner { text-align: center; }
+  .transition-tag { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 24px; }
+  .transition-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 300; line-height: 1.2; margin-bottom: 12px; }
+  .transition-title em { font-style: italic; color: var(--gold-light); }
+  .transition-sub { font-size: 0.9rem; color: var(--muted-light); font-style: italic; margin-bottom: 40px; line-height: 1.6; }
+  .transition-ornament { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); margin: 0 auto 32px; }
+  .transition-loading { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .transition-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s infinite; }
+  .transition-dot:nth-child(2) { animation-delay: 0.2s; }
+  .transition-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* CHAT SCREENS (shared) */
+  .sim-screen { flex-direction: column; height: 100vh; overflow: hidden; }
   .sim-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border-soft); background: rgba(17,17,17,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
   .sim-logo { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; }
+  .sim-phase { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.15em; color: var(--muted-light); text-transform: uppercase; }
   .sim-status { display: flex; align-items: center; gap: 8px; }
   .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.6); animation: pulse 2s infinite; }
+  .status-dot.amber { background: #C9A84C; box-shadow: 0 0 8px rgba(201,168,76,0.6); }
+  .status-dot.red { background: #C0544A; box-shadow: 0 0 8px rgba(192,84,74,0.6); }
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
   .status-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--muted-light); text-transform: uppercase; }
-  .risk-indicator { display: flex; align-items: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
-  .risk-bar-wrap { width: 64px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-  .risk-bar-fill { height: 100%; width: 15%; background: #4CAF50; border-radius: 2px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1), background 0.5s; }
-  .scene-banner { background: rgba(201,168,76,0.05); border-bottom: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .scene-banner { border-bottom: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .scene-banner.jordan { background: rgba(76,175,80,0.04); }
+  .scene-banner.customer { background: rgba(192,84,74,0.04); }
+  .scene-banner.manager { background: rgba(201,168,76,0.04); }
   .scene-tag { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; white-space: nowrap; }
   .scene-divider { width: 1px; height: 14px; background: var(--border); }
   .scene-desc { font-size: 0.82rem; color: var(--muted-light); font-style: italic; }
@@ -67,20 +85,27 @@
   .chat-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .msg-wrap { display: flex; flex-direction: column; margin-bottom: 20px; animation: msgIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
   @keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  .msg-wrap.sim { align-items: flex-start; }
+  .msg-wrap.other { align-items: flex-start; }
   .msg-wrap.user { align-items: flex-end; }
   .msg-wrap.system { align-items: center; margin-bottom: 16px; }
   .msg-sender { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
-  .msg-wrap.sim .msg-sender { color: var(--gold); }
+  .msg-wrap.other .msg-sender { color: var(--gold); }
   .msg-wrap.user .msg-sender { color: var(--muted); }
   .msg-bubble { max-width: min(640px, 85%); padding: 14px 18px; line-height: 1.7; font-size: 1rem; font-weight: 300; }
-  .msg-wrap.sim .msg-bubble { background: var(--bubble-sim); border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; color: var(--cream); }
+  .msg-wrap.other .msg-bubble { border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; color: var(--cream); }
+  .msg-wrap.other.jordan .msg-bubble { background: var(--bubble-jordan); }
+  .msg-wrap.other.customer .msg-bubble { background: var(--bubble-customer); }
+  .msg-wrap.other.manager .msg-bubble { background: var(--bubble-manager); }
   .msg-wrap.user .msg-bubble { background: var(--bubble-user); border: 1px solid rgba(201,168,76,0.2); border-radius: 8px 0 8px 8px; color: var(--cream); font-style: italic; }
   .msg-system { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; text-align: center; padding: 6px 16px; border: 1px solid var(--border-soft); background: rgba(255,255,255,0.02); }
+  .msg-assessment { max-width: min(640px, 85%); padding: 10px 14px; font-size: 0.85rem; color: var(--muted-light); font-style: italic; line-height: 1.6; border-left: 2px solid var(--gold); margin-top: -10px; margin-bottom: 10px; }
   .typing-wrap { display: none; align-items: flex-start; flex-direction: column; margin-bottom: 20px; }
   .typing-wrap.visible { display: flex; }
   .typing-label { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
-  .typing-bubble { background: var(--bubble-sim); border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+  .typing-bubble { border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+  .typing-bubble.jordan { background: var(--bubble-jordan); }
+  .typing-bubble.customer { background: var(--bubble-customer); }
+  .typing-bubble.manager { background: var(--bubble-manager); }
   .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingBounce 1.2s infinite; }
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
   .typing-dot:nth-child(3) { animation-delay: 0.4s; }
@@ -88,20 +113,17 @@
   .input-area { flex-shrink: 0; padding: 16px 20px 20px; background: rgba(17,17,17,0.97); border-top: 1px solid var(--border-soft); }
   .input-prompt { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
   .input-row { display: flex; gap: 10px; align-items: flex-end; }
-  #user-input { flex: 1; background: var(--slate); border: 1px solid var(--border-soft); padding: 13px 16px; font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--cream); resize: none; outline: none; transition: border-color 0.2s; min-height: 50px; max-height: 120px; line-height: 1.5; border-radius: 0; }
-  #user-input:focus { border-color: rgba(201,168,76,0.45); }
-  #user-input::placeholder { color: var(--muted); font-style: italic; }
-  #user-input:disabled { opacity: 0.4; }
-  #send-btn { background: var(--gold); border: none; padding: 13px 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; flex-shrink: 0; height: 50px; }
-  #send-btn:hover { background: var(--gold-light); }
-  #send-btn:disabled { background: var(--slate); cursor: not-allowed; }
-  #send-btn svg { width: 16px; height: 16px; fill: var(--charcoal); }
+  .user-input { flex: 1; background: var(--slate); border: 1px solid var(--border-soft); padding: 13px 16px; font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--cream); resize: none; outline: none; transition: border-color 0.2s; min-height: 50px; max-height: 120px; line-height: 1.5; border-radius: 0; }
+  .user-input:focus { border-color: rgba(201,168,76,0.45); }
+  .user-input::placeholder { color: var(--muted); font-style: italic; }
+  .user-input:disabled { opacity: 0.4; }
+  .send-btn { background: var(--gold); border: none; padding: 13px 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; height: 50px; }
+  .send-btn:hover { background: var(--gold-light); }
+  .send-btn:disabled { background: var(--slate); cursor: not-allowed; }
+  .send-btn svg { width: 16px; height: 16px; fill: var(--charcoal); }
   .input-hint { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 8px; display: flex; justify-content: space-between; }
-  .end-sim-link { color: var(--muted); text-decoration: none; cursor: pointer; background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.08em; padding: 0; transition: color 0.2s; }
-  .end-sim-link:hover { color: var(--gold); }
-  .risk-flash { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: transparent; z-index: 999; pointer-events: none; }
-  .risk-flash.danger { background: var(--danger); animation: flashPulse 0.6s ease; }
-  @keyframes flashPulse { 0%,100% { opacity:0; } 50% { opacity:1; } }
+  .next-phase-link { color: var(--muted); text-decoration: none; cursor: pointer; background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.08em; padding: 0; transition: color 0.2s; }
+  .next-phase-link:hover { color: var(--gold); }
 
   /* DEBRIEF */
   #screen-debrief { overflow-y: auto; align-items: center; padding: 48px 20px; }
@@ -132,8 +154,8 @@
   .debrief-loading-dot:nth-child(3) { animation-delay: 0.4s; }
   .debrief-loading-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
   .debrief-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-  .btn-gold { background: var(--gold); color: var(--charcoal); border: none; padding: 13px 32px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; }
-  .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-gold { background: var(--gold); color: var(--charcoal); border: none; padding: 13px 32px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .btn-gold:hover { background: var(--gold-light); }
   .btn-outline { background: transparent; color: var(--muted-light); border: 1px solid var(--border); padding: 13px 32px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
   @media (max-width: 600px) {
@@ -146,63 +168,148 @@
 </style>
 </head>
 <body>
-<div class="risk-flash" id="risk-flash"></div>
 
 <!-- SETUP -->
 <div class="screen active" id="screen-setup">
   <div class="setup-card">
     <div class="setup-logo">Delany &amp; Co.</div>
     <div class="setup-ornament"></div>
-    <h1 class="setup-title">Live Floor<br><em>Simulation</em></h1>
-    <p class="setup-sub">An AI-powered loss prevention training exercise. You are a sales associate. The floor is live. Respond as you would in the moment.</p>
+    <h1 class="setup-title">Loss Prevention<br><em>Simulation</em></h1>
+    <p class="setup-sub">A professional training exercise for sales associates. Three phases. Real situations. No multiple choice.</p>
     <div class="setup-context">
-      <div class="setup-context-label">Scenario Briefing</div>
-      <p>Valentine&#39;s Day rush. High customer volume. Peak theft season. You will be tested on situational awareness, protocol discipline, and communication under pressure. There are no multiple-choice answers.</p>
+      <div class="setup-context-label">Before You Begin</div>
+      <p>You are a sales associate at Delany &amp; Co. It is Valentine&#39;s Day — the busiest and highest-risk day of the year. You will hear from a colleague, handle a situation on the floor, and then speak with your manager. Respond as you would in real life.</p>
     </div>
-    <button class="btn-begin" id="begin-btn" onclick="beginSimulation()">Enter the Floor</button>
+    <button class="btn-begin" id="begin-btn" onclick="startPhase1()">Begin Simulation</button>
     <p class="setup-error" id="setup-error"></p>
   </div>
 </div>
 
-<!-- SIMULATION -->
-<div class="screen" id="screen-sim">
+<!-- TRANSITION SCREEN -->
+<div class="screen" id="screen-transition">
+  <div class="transition-inner">
+    <div class="transition-tag" id="transition-tag">Phase 2 of 3</div>
+    <div class="transition-ornament"></div>
+    <h2 class="transition-title" id="transition-title">On the <em>Floor</em></h2>
+    <p class="transition-sub" id="transition-sub">Counter 3 — Diamond Display — 14:30</p>
+    <div class="transition-loading">
+      <div class="transition-dot"></div>
+      <div class="transition-dot"></div>
+      <div class="transition-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 1 — JORDAN -->
+<div class="screen sim-screen" id="screen-phase1">
   <div class="sim-topbar">
     <div class="sim-logo">Delany &amp; Co.</div>
+    <div class="sim-phase">Phase 1 of 3</div>
     <div class="sim-status">
-      <div class="status-dot"></div>
-      <span class="status-label">Floor Live</span>
-    </div>
-    <div class="risk-indicator">
-      <span id="risk-label" style="color:#4CAF50;">LOW</span>
-      <div class="risk-bar-wrap"><div class="risk-bar-fill" id="risk-bar"></div></div>
+      <div class="status-dot amber"></div>
+      <span class="status-label">Internal Messenger</span>
     </div>
   </div>
-  <div class="scene-banner">
-    <span class="scene-tag">&#128205; Counter 3 — Diamond Display</span>
+  <div class="scene-banner jordan">
+    <span class="scene-tag">&#128172; Jordan — Senior Associate</span>
     <div class="scene-divider"></div>
-    <span class="scene-desc">Valentine&#39;s Day — 14:30 — High Floor Volume</span>
+    <span class="scene-desc">Valentine&#39;s Day — Pre-shift briefing</span>
   </div>
-  <div class="chat-container" id="chat-container">
-    <div class="typing-wrap" id="typing-indicator">
-      <div class="typing-label">Floor Simulation</div>
-      <div class="typing-bubble">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
+  <div class="chat-container" id="chat-phase1">
+    <div class="typing-wrap" id="typing-phase1">
+      <div class="typing-label">Jordan</div>
+      <div class="typing-bubble jordan">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
       </div>
     </div>
   </div>
   <div class="input-area">
-    <div class="input-prompt">Your response — speak or act as if you are on the floor</div>
+    <div class="input-prompt">Reply to Jordan</div>
     <div class="input-row">
-      <textarea id="user-input" placeholder="What do you say or do?" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <button id="send-btn" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      <textarea class="user-input" id="input-phase1" placeholder="Type your reply..." rows="1" onkeydown="handleKey(event,'phase1')" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-phase1" onclick="sendMessage('phase1')">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
     </div>
     <div class="input-hint">
       <span>Enter to send — Shift+Enter for new line</span>
-      <button class="end-sim-link" onclick="endSimulation()">End &amp; Get Debrief &#8594;</button>
+      <button class="next-phase-link" onclick="triggerTransition('customer')">Go to the floor &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 2 — CUSTOMER -->
+<div class="screen sim-screen" id="screen-phase2">
+  <div class="sim-topbar">
+    <div class="sim-logo">Delany &amp; Co.</div>
+    <div class="sim-phase">Phase 2 of 3</div>
+    <div class="sim-status">
+      <div class="status-dot red"></div>
+      <span class="status-label">Floor — Live</span>
+    </div>
+  </div>
+  <div class="scene-banner customer">
+    <span class="scene-tag">&#128205; Counter 3 — Diamond Display</span>
+    <div class="scene-divider"></div>
+    <span class="scene-desc">Valentine&#39;s Day — 14:30 — High floor volume</span>
+  </div>
+  <div class="chat-container" id="chat-phase2">
+    <div class="typing-wrap" id="typing-phase2">
+      <div class="typing-label">Floor</div>
+      <div class="typing-bubble customer">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-prompt">What do you say or do?</div>
+    <div class="input-row">
+      <textarea class="user-input" id="input-phase2" placeholder="Respond as you would on the floor..." rows="1" onkeydown="handleKey(event,'phase2')" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-phase2" onclick="sendMessage('phase2')">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-hint">
+      <span>Enter to send — Shift+Enter for new line</span>
+      <button class="next-phase-link" onclick="triggerTransition('manager')">End shift &amp; speak to manager &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 3 — MANAGER -->
+<div class="screen sim-screen" id="screen-phase3">
+  <div class="sim-topbar">
+    <div class="sim-logo">Delany &amp; Co.</div>
+    <div class="sim-phase">Phase 3 of 3</div>
+    <div class="sim-status">
+      <div class="status-dot amber"></div>
+      <span class="status-label">Manager&#39;s Office</span>
+    </div>
+  </div>
+  <div class="scene-banner manager">
+    <span class="scene-tag">&#128188; Ms. Reeves — Floor Manager</span>
+    <div class="scene-divider"></div>
+    <span class="scene-desc">Post-shift review — Private</span>
+  </div>
+  <div class="chat-container" id="chat-phase3">
+    <div class="typing-wrap" id="typing-phase3">
+      <div class="typing-label">Ms. Reeves</div>
+      <div class="typing-bubble manager">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-prompt">Speak with Ms. Reeves</div>
+    <div class="input-row">
+      <textarea class="user-input" id="input-phase3" placeholder="Reply honestly..." rows="1" onkeydown="handleKey(event,'phase3')" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-phase3" onclick="sendMessage('phase3')">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-hint">
+      <span>Enter to send — Shift+Enter for new line</span>
+      <button class="next-phase-link" onclick="generateFinalDebrief()">End &amp; get final report &#8594;</button>
     </div>
   </div>
 </div>
@@ -212,26 +319,24 @@
   <div class="debrief-card">
     <div class="debrief-header">
       <div class="debrief-eyebrow">Simulation Complete</div>
-      <h2 class="debrief-title">Post-Incident<br><em>Debrief</em></h2>
+      <h2 class="debrief-title">Performance<br><em>Report</em></h2>
       <div class="debrief-ornament">
         <div class="debrief-ornament-line"></div>
         <div class="debrief-ornament-diamond"></div>
         <div class="debrief-ornament-line"></div>
       </div>
-      <p style="font-size:0.95rem;color:var(--muted-light);line-height:1.6;font-weight:300;">Your performance has been evaluated against Delany &amp; Co. loss prevention standards.</p>
+      <p style="font-size:0.95rem;color:var(--muted-light);line-height:1.6;font-weight:300;">Evaluated against Delany &amp; Co. loss prevention standards.</p>
     </div>
     <div id="debrief-content">
       <div class="debrief-loading">
         <div class="debrief-loading-dots">
-          <div class="debrief-loading-dot"></div>
-          <div class="debrief-loading-dot"></div>
-          <div class="debrief-loading-dot"></div>
+          <div class="debrief-loading-dot"></div><div class="debrief-loading-dot"></div><div class="debrief-loading-dot"></div>
         </div>
-        <span class="debrief-loading-text">Generating expert debrief&#8230;</span>
+        <span class="debrief-loading-text">Generating report&#8230;</span>
       </div>
     </div>
     <div class="debrief-actions">
-      <button class="btn-gold" onclick="restartSim()">Run Again</button>
+      <button class="btn-gold" onclick="location.reload()">Run Again</button>
       <button class="btn-outline" onclick="window.print()">Print Report</button>
     </div>
     <p style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;text-align:center;margin-top:8px;">Delany &amp; Co. — Loss Prevention Division — 2025</p>
@@ -239,38 +344,76 @@
 </div>
 
 <script>
-const GEMINI_MODEL = 'gemini-2.5-flash';
-let history = [];
-let riskLevel = 0;
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let histories = { phase1: [], phase2: [], phase3: [] };
+let currentPhase = null;
 
-const SYSTEM_PROMPT = `You are Jordan, a senior sales associate at Delany & Co., a luxury jewelry retailer. You have worked the jewelry counter for six years and know every shoplifting trick in the book. You are currently on shift with the learner — a newer associate — during the busy Valentine's Day season. The store is open, customers are browsing, and you are communicating with your colleague discreetly via the store's internal messaging app (think: short, realistic messages — not essays).
+// ─── PROMPTS ──────────────────────────────────────────────────────────────────
+const PROMPT_JORDAN = `You are Jordan, a senior sales associate at Delany & Co., a luxury jewelry store. You have worked the counter for six years. You are messaging a newer colleague via the store's internal chat app during the Valentine's Day rush.
 
-YOUR ROLE:
-You are not a trainer. You are a colleague. You do not lecture. You observe what is happening on the floor and message your colleague in real time to flag situations, ask what they would do, or react to their decisions. You keep messages short, natural, and in character — the way a real coworker would text during a shift.
+YOUR CHARACTER RULES — follow these without exception:
+- You are a colleague, not a trainer. You never lecture, explain procedures, or break character.
+- Your messages are short, natural, and direct — the way a real coworker texts during a busy shift. Maximum 2-3 sentences per message.
+- You set the scene briefly and flag one specific thing happening on the floor right now that the learner needs to be aware of. Something is already happening — a suspicious customer, an unusual situation at a display case, a group that just walked in.
+- If the learner's reply is vague, incomplete, or doesn't address what you flagged, push back naturally — ask a follow-up, express mild concern, say what you're observing. Do not accept non-answers.
+- You never reveal the learning objectives. You never mention "simulation", "training", or "procedures".
+- You are warm but focused. The store is busy. You don't have time for long messages.
+- After 3-4 exchanges, wrap up naturally — tell the learner it's time to get on the floor.
 
-THE SIMULATION:
-You will run a continuous scenario set on the shop floor during a busy Valentine's Day shift. Introduce realistic situations one at a time — a customer behaving suspiciously, a distraction attempt, a moment where protocol needs to be followed (e.g. showing an item from the display case, using the display mat, checking a diamond with the tester). Do not rush. Let each situation breathe. Wait for the learner to respond before moving on.
+CONTEXT: It is Valentine's Day. The store is at high capacity. You are at Counter 2. The learner is covering Counter 3 — the diamond display. You've seen some things that concern you.
 
-ASSESSMENT — PROCEDURAL RESPONSES ONLY:
-After the learner responds to each situation, briefly react in character as Jordan. Then, after your in-character reply, add a short out-of-character line in italics (formatted like this: *[Assessment: ...]*) that evaluates whether the learner applied the correct procedure. Be specific: name the procedure, say whether it was correctly applied, and if not, state what should have been done. Keep this assessment to 1–2 sentences maximum.
+START: Send your first message. Set the scene fast. Flag something specific that is already happening near Counter 3.`;
 
-The correct procedures are:
+const PROMPT_CUSTOMER = `You are running a realistic floor simulation at Delany & Co., a luxury jewelry store. You play ALL characters on the floor — customers, potential shoplifters, and the environment itself. The learner is a sales associate covering Counter 3 (diamond display) on Valentine's Day.
+
+YOUR SIMULATION RULES — follow these without exception:
+- You narrate what is happening on the floor in the second person ("A man approaches the counter...") and also speak as characters when they interact with the learner.
+- Introduce one situation at a time. Let it develop fully before introducing something new.
+- The learner must demonstrate the four correct procedures through their responses. You track whether they do or do not apply each one, but you never mention the procedures by name.
+- After each learner response, you react realistically to what they did or said. Then add a single line in italics formatted exactly like this: *[Assessment: ...]* — one sentence stating whether a specific procedure was correctly applied, and if not, what should have been done.
+- If the learner skips a procedure, the situation develops in a way that reflects that — the customer gets impatient, the item is left unattended, a suspicious individual gets closer.
+- Keep the atmosphere tense but grounded. This is a luxury store. Tone is professional, not dramatic.
+- You never break character outside of the *[Assessment: ...]* line.
+- You never offer multiple choice options. The learner must respond in free text.
+
+THE FOUR PROCEDURES TO TRACK:
 1. Always lock and unlock the display case when removing and replacing items.
 2. Show only one item of jewelry at a time.
 3. Keep all jewelry on the display mat while showing it to a customer.
-4. Use the diamond tester to verify diamonds when removing and returning any item to the case.
+4. Use the diamond tester to verify diamonds when removing or returning any item to the case.
 
-RULES:
-- Stay in character as Jordan unless writing an assessment note.
-- Never explain the learning objectives or break the fourth wall outside of assessments.
-- Do not offer multiple choice options. This is a free-text conversation.
-- If the learner's response is vague or incomplete, push back naturally as Jordan would — ask a follow-up, express mild concern, describe what you are observing.
-- Keep the scenario grounded and specific. Real store, real shift, real stakes.
-- Only when the learner asks to end or requests a debrief: output SIMULATION_COMPLETE on its own line, then output ONLY this JSON (nothing else before or after the JSON):
-{"well":["point","point"],"missed":["point","point"],"signals":["signal","signal"],"expert":"2-3 sentence expert perspective."}
+SUSPICIOUS BEHAVIOUR SIGNALS TO INTRODUCE (use at least two across the scenario):
+- A customer who avoids eye contact and positions themselves unusually close to the display
+- A second person who enters and splits off from the first, hovering near a different case
+- Someone who keeps asking to see multiple pieces at once
+- A customer who seems more interested in watching the associate than in the jewelry
 
-START:
-Open with a brief, casual message from Jordan that sets the scene and immediately introduces the first situation. Something is already happening on the floor.`;
+SCENARIO START: A customer approaches Counter 3. Describe the scene briefly and have the customer speak. Something about the situation is slightly off — the learner should notice if they are paying attention.`;
+
+const PROMPT_MANAGER = `You are Ms. Reeves, the floor manager at Delany & Co. You have just called a sales associate into your office for a post-shift conversation after Valentine's Day. You have reviewed the CCTV footage and you know exactly how the shift went.
+
+YOUR CHARACTER RULES — follow these without exception:
+- You are calm, professional, and direct. You are not hostile, but you are not soft either.
+- You do not tell the associate what they did wrong. You ask questions that lead them to reflect on it themselves.
+- Your questions are specific and grounded in what actually happened on the floor — reference the situation with the customer, the display case, the items shown.
+- You ask one question at a time. You wait for a response before continuing.
+- If the associate's answer is vague or deflects, you follow up — gently but persistently.
+- Only after 4-5 exchanges, when the associate has had the chance to reflect, do you offer a brief, specific closing observation — one or two sentences that name what was done well and what needs to change.
+- You never use the word "simulation" or "training exercise". This is a real conversation.
+- You never break character.
+
+CONVERSATION GOAL: Guide the associate to articulate — in their own words — what happened, whether they followed procedure, and what they would do differently. This is about metacognition, not judgment.
+
+CONTEXT YOU HAVE: The associate just completed a shift at Counter 3. There was at least one interaction with a customer involving the diamond display. You have seen the footage. You know the details. Reference them specifically.
+
+START: Welcome the associate briefly. Then ask your first question — specific, calm, direct.`;
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(t) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(t));
+  return d.innerHTML;
+}
 
 function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -281,215 +424,250 @@ function goTo(id) {
   el.style.animation = '';
 }
 
-async function callGemini(msgs) {
-  const contents = msgs.length > 0 ? msgs : [{ role: 'user', parts: [{ text: 'Begin.' }] }];
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e, phase) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(phase); }
+}
+
+function setUI(phase, disabled) {
+  document.getElementById('input-' + phase).disabled = disabled;
+  document.getElementById('send-' + phase).disabled = disabled;
+}
+
+function getTypingEl(phase) { return document.getElementById('typing-' + phase); }
+function getChatEl(phase) { return document.getElementById('chat-' + phase); }
+
+function setTyping(phase, on) {
+  const el = getTypingEl(phase);
+  el.className = 'typing-wrap' + (on ? ' visible' : '');
+  if (on) {
+    setTimeout(() => {
+      const c = getChatEl(phase);
+      c.scrollTop = c.scrollHeight;
+    }, 60);
+  }
+}
+
+function addMsg(phase, type, text, senderLabel) {
+  const container = getChatEl(phase);
+  const indicator = getTypingEl(phase);
+  const wrap = document.createElement('div');
+
+  if (type === 'system') {
+    wrap.className = 'msg-wrap system';
+    wrap.innerHTML = '<div class="msg-system">' + esc(text) + '</div>';
+  } else if (type === 'assessment') {
+    wrap.className = 'msg-assessment';
+    wrap.textContent = text;
+  } else {
+    const roleClass = type === 'user' ? 'user' : 'other ' + type;
+    wrap.className = 'msg-wrap ' + roleClass;
+    const sender = type === 'user' ? 'You' : senderLabel;
+    wrap.innerHTML = '<div class="msg-sender">' + esc(sender) + '</div><div class="msg-bubble">' + esc(text) + '</div>';
+  }
+
+  container.insertBefore(wrap, indicator);
+  setTimeout(() => { container.scrollTop = container.scrollHeight; }, 60);
+}
+
+// ─── API ──────────────────────────────────────────────────────────────────────
+async function callGemini(messages) {
   const res = await fetch('/.netlify/functions/gemini', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: contents,
+      system_instruction: { parts: [{ text: messages.systemPrompt }] },
+      contents: messages.history,
       generationConfig: { maxOutputTokens: 600, temperature: 0.85 }
     })
   });
   if (!res.ok) {
-    const err = await res.json().catch(function() { return {}; });
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.error && err.error.message ? err.error.message : 'HTTP ' + res.status);
   }
   const data = await res.json();
   return (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) ? data.candidates[0].content.parts[0].text : '';
 }
 
-function parseResponse(text) {
-  const match = text.match(/RISK_LEVEL:\s*(\d+)/);
-  const risk = match ? parseInt(match[1]) : null;
-  const clean = text.replace(/RISK_LEVEL:\s*\d+\n?/g, '').replace(/SIMULATION_COMPLETE\n?/g, '').trim();
-  return { text: clean, risk: risk };
+function getPromptForPhase(phase) {
+  if (phase === 'phase1') return PROMPT_JORDAN;
+  if (phase === 'phase2') return PROMPT_CUSTOMER;
+  if (phase === 'phase3') return PROMPT_MANAGER;
 }
 
-function addMsg(type, text) {
-  const container = document.getElementById('chat-container');
-  const indicator = document.getElementById('typing-indicator');
-  const wrap = document.createElement('div');
-  wrap.className = 'msg-wrap ' + type;
-  if (type === 'system') {
-    wrap.innerHTML = '<div class="msg-system">' + esc(text) + '</div>';
-  } else {
-    const sender = type === 'sim' ? 'Floor Simulation' : 'You';
-    wrap.innerHTML = '<div class="msg-sender">' + sender + '</div><div class="msg-bubble">' + esc(text) + '</div>';
-  }
-  container.insertBefore(wrap, indicator);
-  setTimeout(function() { container.scrollTop = container.scrollHeight; }, 60);
+function getSenderLabel(phase) {
+  if (phase === 'phase1') return 'Jordan';
+  if (phase === 'phase2') return 'Floor';
+  if (phase === 'phase3') return 'Ms. Reeves';
 }
 
-function setTyping(on) {
-  const el = document.getElementById('typing-indicator');
-  el.className = 'typing-wrap' + (on ? ' visible' : '');
-  if (on) setTimeout(function() { const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight; }, 60);
+function getCharacterClass(phase) {
+  if (phase === 'phase1') return 'jordan';
+  if (phase === 'phase2') return 'customer';
+  if (phase === 'phase3') return 'manager';
 }
 
-function setUI(disabled) {
-  document.getElementById('user-input').disabled = disabled;
-  document.getElementById('send-btn').disabled = disabled;
-}
+// ─── PHASE LOGIC ──────────────────────────────────────────────────────────────
+async function startPhase(phase) {
+  currentPhase = phase;
+  setTyping(phase, true);
+  setUI(phase, true);
 
-function updateRisk(level) {
-  if (level === null || level === undefined) return;
-  riskLevel = level;
-  const bar = document.getElementById('risk-bar');
-  const label = document.getElementById('risk-label');
-  bar.style.width = level + '%';
-  if (level < 30) {
-    bar.style.background = '#4CAF50'; label.style.color = '#4CAF50'; label.textContent = 'LOW';
-  } else if (level < 65) {
-    bar.style.background = '#C9A84C'; label.style.color = '#C9A84C'; label.textContent = 'MED';
-  } else {
-    bar.style.background = '#C0544A'; label.style.color = '#C0544A'; label.textContent = 'HIGH';
-    const flash = document.getElementById('risk-flash');
-    flash.className = 'risk-flash danger';
-    setTimeout(function() { flash.className = 'risk-flash'; }, 700);
-  }
-}
-
-function esc(text) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(text));
-  return d.innerHTML;
-}
-
-async function beginSimulation() {
-  const btn = document.getElementById('begin-btn');
-  const errEl = document.getElementById('setup-error');
-  btn.disabled = true;
-  btn.textContent = 'Entering the floor...';
-  errEl.style.display = 'none';
-  history = [];
-  goTo('screen-sim');
-  addMsg('system', 'Simulation Active — Valentine\'s Day — 14:30');
-  setTyping(true);
-  setUI(true);
   try {
-    const response = await callGemini([]);
-    const parsed = parseResponse(response);
-    history = [
+    const response = await callGemini({
+      systemPrompt: getPromptForPhase(phase),
+      history: []
+    });
+
+    histories[phase] = [
       { role: 'user', parts: [{ text: 'Begin.' }] },
       { role: 'model', parts: [{ text: response }] }
     ];
-    setTyping(false);
-    addMsg('sim', parsed.text);
-    updateRisk(parsed.risk !== null ? parsed.risk : 10);
-    setUI(false);
-    document.getElementById('user-input').focus();
+
+    setTyping(phase, false);
+    parseAndRender(phase, response);
+    setUI(phase, false);
+    document.getElementById('input-' + phase).focus();
   } catch(e) {
-    setTyping(false);
-    btn.disabled = false;
-    btn.textContent = 'Enter the Floor';
-    goTo('screen-setup');
-    errEl.textContent = 'Connection error: ' + e.message;
-    errEl.style.display = 'block';
+    setTyping(phase, false);
+    addMsg(phase, 'system', 'Connection error: ' + e.message);
+    setUI(phase, false);
+    document.getElementById('setup-error').textContent = 'Connection error: ' + e.message;
+    document.getElementById('setup-error').style.display = 'block';
   }
 }
 
-async function sendMessage() {
-  const input = document.getElementById('user-input');
+async function sendMessage(phase) {
+  const input = document.getElementById('input-' + phase);
   const text = input.value.trim();
   if (!text) return;
   input.value = '';
   input.style.height = 'auto';
-  setUI(true);
-  addMsg('user', text);
-  history.push({ role: 'user', parts: [{ text: text }] });
-  setTyping(true);
-  try {
-    const response = await callGemini(history);
-    history.push({ role: 'model', parts: [{ text: response }] });
-    if (response.indexOf('SIMULATION_COMPLETE') !== -1) {
-      setTyping(false);
-      generateDebrief(response);
-      return;
-    }
-    const parsed = parseResponse(response);
-    setTyping(false);
-    addMsg('sim', parsed.text);
-    updateRisk(parsed.risk !== null ? parsed.risk : riskLevel);
-  } catch(e) {
-    setTyping(false);
-    addMsg('sim', '[ Connection error: ' + e.message + ' ]');
-  }
-  setUI(false);
-  document.getElementById('user-input').focus();
-}
+  setUI(phase, true);
+  addMsg(phase, 'user', text, 'You');
+  histories[phase].push({ role: 'user', parts: [{ text: text }] });
+  setTyping(phase, true);
 
-async function endSimulation() {
-  setUI(true);
-  setTyping(true);
-  history.push({ role: 'user', parts: [{ text: 'End simulation. Give me the full debrief now.' }] });
   try {
-    const response = await callGemini(history);
-    setTyping(false);
-    generateDebrief(response);
-  } catch(e) {
-    setTyping(false);
-    generateDebrief('');
-  }
-}
-
-function generateDebrief(responseText) {
-  goTo('screen-debrief');
-  const contentEl = document.getElementById('debrief-content');
-  try {
-    const jsonMatch = responseText.match(/\{[\s\S]*"well"[\s\S]*"expert"[\s\S]*\}/);
-    if (jsonMatch) {
-      renderDebrief(JSON.parse(jsonMatch[0]));
-      return;
-    }
-  } catch(e) {}
-  // Fallback: ask Gemini directly
-  const prompt = 'Based on this training simulation, provide a JSON debrief with keys: well (array), missed (array), signals (array), expert (string). Output JSON only.\n\n' +
-    history.map(function(m) { return m.role.toUpperCase() + ': ' + (m.parts && m.parts[0] ? m.parts[0].text : ''); }).join('\n\n');
-  callGemini([{ role: 'user', parts: [{ text: prompt }] }])
-    .then(function(res) {
-      try {
-        const match = res.match(/\{[\s\S]*\}/);
-        if (match) { renderDebrief(JSON.parse(match[0])); return; }
-      } catch(e) {}
-      renderDebrief({ well: ['You completed the simulation.'], missed: ['Review your session for areas to improve.'], signals: ['Multiple risk signals were introduced during the scenario.'], expert: 'Review the scenario carefully and retake the simulation to improve your score.' });
-    })
-    .catch(function() {
-      renderDebrief({ well: ['You completed the simulation.'], missed: ['Review your session for areas to improve.'], signals: ['Multiple risk signals were introduced during the scenario.'], expert: 'Review the scenario carefully and retake the simulation to improve your score.' });
+    const response = await callGemini({
+      systemPrompt: getPromptForPhase(phase),
+      history: histories[phase]
     });
+    histories[phase].push({ role: 'model', parts: [{ text: response }] });
+    setTyping(phase, false);
+    parseAndRender(phase, response);
+  } catch(e) {
+    setTyping(phase, false);
+    addMsg(phase, 'system', 'Connection error: ' + e.message);
+  }
+
+  setUI(phase, false);
+  document.getElementById('input-' + phase).focus();
+}
+
+function parseAndRender(phase, text) {
+  const senderLabel = getSenderLabel(phase);
+  const charClass = getCharacterClass(phase);
+
+  // Split assessment note from main text
+  const assessmentMatch = text.match(/\*\[Assessment:[^\]]*\]\*/);
+  let mainText = text;
+  let assessmentText = null;
+
+  if (assessmentMatch) {
+    mainText = text.replace(assessmentMatch[0], '').trim();
+    assessmentText = assessmentMatch[0].replace(/\*/g, '').replace('[Assessment:', '').replace(']', '').trim();
+  }
+
+  if (mainText) addMsg(phase, charClass, mainText, senderLabel);
+  if (assessmentText) addMsg(phase, 'assessment', '↳ ' + assessmentText);
+}
+
+// ─── TRANSITIONS ──────────────────────────────────────────────────────────────
+function startPhase1() {
+  const btn = document.getElementById('begin-btn');
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  goTo('screen-phase1');
+  startPhase('phase1');
+}
+
+function triggerTransition(target) {
+  if (target === 'customer') {
+    document.getElementById('transition-tag').textContent = 'Phase 2 of 3';
+    document.getElementById('transition-title').innerHTML = 'On the <em>Floor</em>';
+    document.getElementById('transition-sub').textContent = 'Counter 3 — Diamond Display — 14:30';
+  } else if (target === 'manager') {
+    document.getElementById('transition-tag').textContent = 'Phase 3 of 3';
+    document.getElementById('transition-title').innerHTML = 'Manager\'s <em>Office</em>';
+    document.getElementById('transition-sub').textContent = 'Post-shift review — Ms. Reeves is waiting';
+  }
+  goTo('screen-transition');
+  setTimeout(() => {
+    if (target === 'customer') {
+      goTo('screen-phase2');
+      startPhase('phase2');
+    } else if (target === 'manager') {
+      goTo('screen-phase3');
+      startPhase('phase3');
+    }
+  }, 2800);
+}
+
+// ─── FINAL DEBRIEF ────────────────────────────────────────────────────────────
+async function generateFinalDebrief() {
+  goTo('screen-debrief');
+
+  const fullTranscript =
+    'PHASE 1 — JORDAN (colleague briefing):\n' +
+    histories.phase1.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n') +
+    '\n\nPHASE 2 — FLOOR (customer interaction):\n' +
+    histories.phase2.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n') +
+    '\n\nPHASE 3 — MANAGER (post-shift review):\n' +
+    histories.phase3.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n');
+
+  const debriefPrompt = `You are a loss prevention training evaluator at Delany & Co. Review the full simulation transcript below and produce a concise performance report.
+
+The four procedures being assessed are:
+1. Always lock and unlock the display case when removing and replacing items.
+2. Show only one item of jewelry at a time.
+3. Keep all jewelry on the display mat while showing it to a customer.
+4. Use the diamond tester to verify diamonds when removing or returning any item to the case.
+
+Output ONLY this JSON, nothing else:
+{"well":["what the associate did well — be specific, max 3 points"],"missed":["what was missed or done incorrectly — be specific, reference the transcript, max 3 points"],"signals":["suspicious behaviours that were present in the scenario — name them clearly, max 3 points"],"expert":"A 2-3 sentence closing observation from an experienced loss prevention professional. Direct, honest, constructive."}
+
+TRANSCRIPT:
+${fullTranscript}`;
+
+  try {
+    const response = await callGemini({
+      systemPrompt: 'You are a loss prevention training evaluator. Output only valid JSON.',
+      history: [{ role: 'user', parts: [{ text: debriefPrompt }] }]
+    });
+
+    const match = response.match(/\{[\s\S]*\}/);
+    if (match) {
+      renderDebrief(JSON.parse(match[0]));
+    } else {
+      renderDebrief({ well: ['Simulation completed.'], missed: ['Review your session carefully.'], signals: ['Multiple risk signals were present.'], expert: 'Review the full transcript and retake the simulation to improve your score.' });
+    }
+  } catch(e) {
+    renderDebrief({ well: ['Simulation completed.'], missed: ['Review your session carefully.'], signals: ['Multiple risk signals were present.'], expert: 'Review the full transcript and retake the simulation to improve your score.' });
+  }
 }
 
 function renderDebrief(data) {
-  const makeList = function(items) { return (items || []).map(function(i) { return '<li>' + esc(i) + '</li>'; }).join(''); };
+  const makeList = items => (items || []).map(i => '<li>' + esc(i) + '</li>').join('');
   document.getElementById('debrief-content').innerHTML =
     '<div class="debrief-section well"><div class="debrief-section-label">&#10003; What You Did Well</div><ul>' + makeList(data.well) + '</ul></div>' +
     '<div class="debrief-section missed"><div class="debrief-section-label">&#10007; What You Missed</div><ul>' + makeList(data.missed) + '</ul></div>' +
     '<div class="debrief-section signals"><div class="debrief-section-label">&#9672; Risk Signals Present</div><ul>' + makeList(data.signals) + '</ul></div>' +
     '<div class="debrief-section expert"><div class="debrief-section-label">&#10022; Expert Perspective</div><p>' + esc(data.expert || '') + '</p></div>';
-}
-
-function restartSim() {
-  history = [];
-  riskLevel = 0;
-  updateRisk(0);
-  const container = document.getElementById('chat-container');
-  const indicator = document.getElementById('typing-indicator');
-  Array.from(container.children).forEach(function(c) { if (c !== indicator) container.removeChild(c); });
-  indicator.className = 'typing-wrap';
-  document.getElementById('debrief-content').innerHTML = '<div class="debrief-loading"><div class="debrief-loading-dots"><div class="debrief-loading-dot"></div><div class="debrief-loading-dot"></div><div class="debrief-loading-dot"></div></div><span class="debrief-loading-text">Generating expert debrief...</span></div>';
-  document.getElementById('begin-btn').disabled = false;
-  document.getElementById('begin-btn').textContent = 'Enter the Floor';
-  beginSimulation();
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 </script>
 </body>
