@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,6 +77,7 @@
   .scene-tag { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; white-space: nowrap; }
   .scene-divider { width: 1px; height: 14px; background: var(--border); }
   .scene-desc { font-size: 0.82rem; color: var(--muted-light); font-style: italic; }
+  .scenario-desc { font-size: 0.85rem; color: var(--muted-light); font-style: italic; margin: 8px 28px; }
   .chat-container { flex: 1; overflow-y: auto; padding: 28px 20px; display: flex; flex-direction: column; gap: 0; scroll-behavior: smooth; }
   .chat-container::-webkit-scrollbar { width: 4px; }
   .chat-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -215,6 +213,7 @@
     <div class="scene-divider"></div>
     <span class="scene-desc">Valentine&#39;s Day — Pre-shift briefing</span>
   </div>
+  <div class="scenario-desc">Pre-shift preparation at your workstation. Jordan contacts you from Counter 2.</div>
   <div class="chat-container" id="chat-phase1">
     <div class="typing-wrap" id="typing-phase1">
       <div class="typing-label">Jordan</div>
@@ -253,6 +252,7 @@
     <div class="scene-divider"></div>
     <span class="scene-desc">Valentine&#39;s Day — 14:30 — High floor volume</span>
   </div>
+  <div class="scenario-desc">On the sales floor at Counter 3. A customer approaches. Initiate the interaction.</div>
   <div class="chat-container" id="chat-phase2">
     <div class="typing-wrap" id="typing-phase2">
       <div class="typing-label">Floor</div>
@@ -291,6 +291,7 @@
     <div class="scene-divider"></div>
     <span class="scene-desc">Post-shift review — Private</span>
   </div>
+  <div class="scenario-desc">Post-shift review in the manager's office. Ms. Reeves is ready to discuss your performance.</div>
   <div class="chat-container" id="chat-phase3">
     <div class="typing-wrap" id="typing-phase3">
       <div class="typing-label">Ms. Reeves</div>
@@ -364,10 +365,13 @@ CONTEXT: It is Valentine's Day. The store is at high capacity. You are at Counte
 
 START: Send your first message. Set the scene fast. Flag something specific that is already happening near Counter 3.`;
 
-const PROMPT_CUSTOMER = `You are running a realistic floor simulation at Delany & Co., a luxury jewelry store. You play ALL characters on the floor — customers, potential shoplifters, and the environment itself. The learner is a sales associate covering Counter 3 (diamond display) on Valentine's Day.
+const PROMPT_CUSTOMER = `You are running a realistic floor simulation at Delany & Co., a luxury jewelry store. You play the customer and the environment. The learner is a sales associate covering Counter 3 (diamond display) on Valentine's Day.
+
+CONTEXT: A man in a well-cut suit approaches the counter, carrying a single red rose. He seems flustered and his eyes dart around the store. The learner will initiate the conversation.
 
 YOUR SIMULATION RULES — follow these without exception:
-- You narrate what is happening on the floor in the second person ("A man approaches the counter...") and also speak as characters when they interact with the learner.
+- Respond as the customer to the learner's messages. Use direct dialogue for the customer.
+- Narrate developments briefly in second person ("The customer looks impatient...") when the situation changes, but keep it minimal.
 - Introduce one situation at a time. Let it develop fully before introducing something new.
 - The learner must demonstrate the four correct procedures through their responses. You track whether they do or do not apply each one, but you never mention the procedures by name.
 - After each learner response, you react realistically to what they did or said. Then add a single line in italics formatted exactly like this: *[Assessment: ...]* — one sentence stating whether a specific procedure was correctly applied, and if not, what should have been done.
@@ -386,9 +390,7 @@ SUSPICIOUS BEHAVIOUR SIGNALS TO INTRODUCE (use at least two across the scenario)
 - A customer who avoids eye contact and positions themselves unusually close to the display
 - A second person who enters and splits off from the first, hovering near a different case
 - Someone who keeps asking to see multiple pieces at once
-- A customer who seems more interested in watching the associate than in the jewelry
-
-SCENARIO START: A customer approaches Counter 3. Describe the scene briefly and have the customer speak. Something about the situation is slightly off — the learner should notice if they are paying attention.`;
+- A customer who seems more interested in watching the associate than in the jewelry`;
 
 const PROMPT_MANAGER = `You are Ms. Reeves, the floor manager at Delany & Co. You have just called a sales associate into your office for a post-shift conversation after Valentine's Day. You have reviewed the CCTV footage and you know exactly how the shift went.
 
@@ -406,7 +408,7 @@ CONVERSATION GOAL: Guide the associate to articulate — in their own words — 
 
 CONTEXT YOU HAVE: The associate just completed a shift at Counter 3. There was at least one interaction with a customer involving the diamond display. You have seen the footage. You know the details. Reference them specifically.
 
-START: Welcome the associate briefly. Then ask your first question — specific, calm, direct.`;
+START: Welcome the associate briefly, mentioning that you want to discuss the recent customer interaction at Counter 3. Then ask your first question about what happened during that encounter.`;
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 function esc(t) {
@@ -517,6 +519,14 @@ async function startPhase(phase) {
   setTyping(phase, true);
   setUI(phase, true);
 
+  if (phase === 'phase2') {
+    histories[phase] = [];
+    setTyping(phase, false);
+    setUI(phase, false);
+    document.getElementById('input-' + phase).focus();
+    return;
+  }
+
   try {
     const response = await callGemini({
       systemPrompt: getPromptForPhase(phase),
@@ -524,7 +534,6 @@ async function startPhase(phase) {
     });
 
     histories[phase] = [
-      { role: 'user', parts: [{ text: 'Begin.' }] },
       { role: 'model', parts: [{ text: response }] }
     ];
 
