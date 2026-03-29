@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,12 +26,9 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; font-family: 'Cormorant Garamond', Georgia, serif; background: var(--charcoal); color: var(--cream); overflow: hidden; }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
-
   .screen { display: none; position: fixed; inset: 0; z-index: 1; animation: screenIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
   .screen.active { display: flex; flex-direction: column; }
   @keyframes screenIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-
-  /* SETUP */
   #screen-setup { align-items: center; justify-content: center; padding: 40px 20px; overflow-y: auto; }
   .setup-card { width: 100%; max-width: 480px; display: flex; flex-direction: column; }
   .setup-logo { font-family: 'DM Mono', monospace; font-size: 1.2rem; letter-spacing: 0.35em; color: var(--gold); text-transform: uppercase; text-align: center; margin-bottom: 48px; }
@@ -45,8 +43,6 @@
   .btn-begin:hover { background: var(--gold-light); transform: translateY(-1px); }
   .btn-begin:disabled { background: var(--slate); color: var(--muted); cursor: not-allowed; transform: none; }
   .setup-error { font-family: 'DM Mono', monospace; font-size: 1.2rem; color: #C0544A; margin-top: 10px; letter-spacing: 0.05em; display: none; }
-
-  /* TRANSITION SPLASH */
   #screen-transition { align-items: center; justify-content: center; background: var(--charcoal); }
   .transition-inner { text-align: center; }
   .transition-tag { font-family: 'DM Mono', monospace; font-size: 1.08rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 24px; }
@@ -58,8 +54,6 @@
   .transition-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s infinite; }
   .transition-dot:nth-child(2) { animation-delay: 0.2s; }
   .transition-dot:nth-child(3) { animation-delay: 0.4s; }
-
-  /* CHAT SCREENS (shared) */
   .sim-screen { flex-direction: column; height: 100vh; overflow: hidden; }
   .sim-topbar { display: flex; align-items: center; justify-content: space-between; padding: 24px 48px; border-bottom: 1px solid var(--border-soft); background: rgba(17,17,17,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
   .sim-logo { font-family: 'DM Mono', monospace; font-size: 1.2rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; }
@@ -99,7 +93,7 @@
   .msg-assessment { max-width: min(640px, 85%); padding: 16.8px 21.6px; font-size: 1.44rem; color: var(--muted-light); font-style: italic; line-height: 1.6; border-left: 2px solid var(--gold); margin-top: -10px; margin-bottom: 10px; }
   .typing-wrap { display: none; align-items: flex-start; flex-direction: column; margin-bottom: 20px; }
   .typing-wrap.visible { display: flex; }
-  .typing-label { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
+  .typing-label { font-family: 'DM Mono', monospace; font-size: 1.08rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
   .typing-bubble { border: 1px solid var(--border-soft); border-radius: 0 8px 8px 8px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
   .typing-bubble.jordan { background: var(--bubble-jordan); }
   .typing-bubble.customer { background: var(--bubble-customer); }
@@ -119,11 +113,9 @@
   .send-btn:hover { background: var(--gold-light); }
   .send-btn:disabled { background: var(--slate); cursor: not-allowed; }
   .send-btn svg { width: 26.4px; height: 26.4px; fill: var(--charcoal); }
-  .input-hint { font-family: 'DM Mono', monospace; font-size: 1.08rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 12px; display: flex; justify-content: space-between; }
+  .input-hint { font-family: 'DM Mono', monospace; font-size: 1.08rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
   .next-phase-link { color: var(--gold); text-decoration: none; cursor: pointer; background: rgba(201,168,76,0.1); border: 1px solid var(--gold); padding: 12px 21.6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 1.14rem; letter-spacing: 0.08em; transition: all 0.2s; }
   .next-phase-link:hover { background: var(--gold); color: var(--charcoal); }
-
-  /* DEBRIEF */
   #screen-debrief { overflow-y: auto; align-items: center; padding: 48px 20px; }
   #screen-debrief::-webkit-scrollbar { width: 4px; }
   #screen-debrief::-webkit-scrollbar-thumb { background: var(--border); }
@@ -163,10 +155,6 @@
     .input-area { padding: 14.4px 16.8px 19.2px; }
     .msg-bubble { font-size: 1.44rem; }
     .user-input { font-size: 1.44rem; }
-    .input-prompt { font-size: 1.08rem; }
-    .sim-phase, .status-label { font-size: 1.08rem; }
-    .scene-desc { font-size: 1.44rem; }
-    .scenario-desc { font-size: 1.44rem; }
   }
   @media (max-width: 480px) {
     .sim-topbar { padding: 12px 16px; }
@@ -176,12 +164,6 @@
     .msg-bubble { font-size: 1.2rem; padding: 16px 20px; }
     .user-input { font-size: 1.2rem; padding: 16px 20px; min-height: 60px; max-height: 120px; }
     .send-btn { height: 60px; }
-    .input-prompt { font-size: 1rem; }
-    .sim-phase, .status-label { font-size: 1rem; }
-    .scene-desc { font-size: 1.2rem; }
-    .scenario-desc { font-size: 1.2rem; }
-    .msg-sender { font-size: 0.9rem; }
-    .debrief-section p, .debrief-section ul { font-size: 1.2rem; }
   }
 </style>
 </head>
@@ -203,7 +185,7 @@
   </div>
 </div>
 
-<!-- TRANSITION SCREEN -->
+<!-- TRANSITION -->
 <div class="screen" id="screen-transition">
   <div class="transition-inner">
     <div class="transition-tag" id="transition-tag">Phase 2 of 3</div>
@@ -346,7 +328,7 @@
         <div class="debrief-ornament-diamond"></div>
         <div class="debrief-ornament-line"></div>
       </div>
-      <p style="font-size:0.95rem;color:var(--muted-light);line-height:1.6;font-weight:300;">Evaluated against Delany &amp; Co. loss prevention standards.</p>
+      <p style="font-size:1.4rem;color:var(--muted-light);line-height:1.6;font-weight:300;">Evaluated against Delany &amp; Co. loss prevention standards.</p>
     </div>
     <div id="debrief-content">
       <div class="debrief-loading">
@@ -360,43 +342,13 @@
       <button class="btn-gold" onclick="location.reload()">Run Again</button>
       <button class="btn-outline" onclick="window.print()">Print Report</button>
     </div>
-    <p style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;text-align:center;margin-top:8px;">Delany &amp; Co. — Loss Prevention Division — 2025</p>
+    <p style="font-family:'DM Mono',monospace;font-size:1rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;text-align:center;margin-top:8px;">Delany &amp; Co. — Loss Prevention Division — 2025</p>
   </div>
 </div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
 let histories = { phase1: [], phase2: [], phase3: [] };
 let currentPhase = null;
-
-// ─── PROMPTS ──────────────────────────────────────────────────────────────────
-const PROMPT_JORDAN = `You are Jordan Ellis, senior associate at Delany & Co. You are 34, six years on this floor. You are messaging a colleague via the store's internal chat during Valentine's Day rush.
-
-WHO YOU ARE:
-You are crew, not management. Direct, dry, occasionally sardonic. You take the job seriously without performing it. You treat colleagues as adults and expect them to act like it. You are not a mentor — you are someone watching the same floor and seeing something develop.
-
-HOW YOU WRITE — follow this exactly:
-- Maximum 2 sentences per message. No exceptions.
-- Lowercase, contractions, no sign-off. This is a chat window, not an email.
-- Always name the specific thing you are seeing. Never say "something looks off" — say what it is and where.
-- Never use: "procedure", "protocol", "training", "make sure you", "don't forget to".
-
-EXAMPLE OF A CORRECT MESSAGE FROM YOU:
-"guy at the far end of counter 3 hasn't looked at a single piece — just watching sarah's hands. been there four minutes."
-
-EXAMPLE OF AN INCORRECT MESSAGE FROM YOU (never write like this):
-"Hey, just wanted to give you a heads up that there's a customer near your counter who seems a bit suspicious. Make sure you follow protocol and stay alert."
-
-HOW YOU RESPOND TO THE LEARNER:
-- If they reply with a concrete action or observation → acknowledge briefly, add what you are now seeing.
-- If they reply vaguely (e.g. "ok thanks", "I'll keep an eye out") → push back with a specific follow-up. "keep an eye out for what exactly?"
-- If they reply with something that misses the point → say what you are still seeing. Don't explain why it matters. Just describe it.
-- After 3-4 exchanges → close naturally. "alright, back to my counter. you've got this — or you don't, we'll see."
-
-WHAT YOU HAVE SEEN:
-Valentine's Day, 14:20. Floor at capacity. You are at Counter 2 with a partial sightline to Counter 3 (diamond display). A specific situation near Counter 3 has your attention — not critical yet, but the kind of thing that moves fast if the associate is not switched on.
-
-START: One message. Name what you are seeing. Be specific. Be brief;
 
 const PROMPT_JORDAN = `You are Jordan Ellis, senior associate at Delany & Co. You are 34, six years on this floor. You are messaging a colleague via the store's internal chat during Valentine's Day rush.
 
@@ -416,10 +368,10 @@ EXAMPLE OF AN INCORRECT MESSAGE FROM YOU — never write like this:
 "Hey, just wanted to give you a heads up that there's a customer near your counter who seems a bit suspicious. Make sure you follow protocol and stay alert."
 
 HOW YOU RESPOND TO THE LEARNER:
-- If they reply with a concrete action or observation → acknowledge briefly, add what you are now seeing.
-- If they reply vaguely (e.g. "ok thanks", "I'll keep an eye out") → push back with a specific follow-up: "keep an eye out for what exactly?"
-- If they reply with something that misses the point → describe what you are still seeing. Do not explain why it matters. Just report it.
-- After 3-4 exchanges → close naturally. Something like: "alright, back to my counter. you've got this — or you don't, we'll see."
+- If they reply with a concrete action or observation — acknowledge briefly, add what you are now seeing.
+- If they reply vaguely (e.g. "ok thanks", "I'll keep an eye out") — push back with a specific follow-up: "keep an eye out for what exactly?"
+- If they reply with something that misses the point — describe what you are still seeing. Do not explain why it matters. Just report it.
+- After 3-4 exchanges — close naturally. Something like: "alright, back to my counter. you've got this — or you don't, we'll see."
 
 WHAT YOU HAVE SEEN:
 Valentine's Day, 14:20. Floor at capacity. You are at Counter 2 with a partial sightline to Counter 3 — the diamond display. A specific situation near Counter 3 has caught your attention. Not critical yet. But in your experience, this kind of thing moves fast if the associate is not switched on.
@@ -444,11 +396,11 @@ HOW THE SCENARIO STARTS:
 You are standing at the counter, looking at the display case. You have not spoken yet. Wait for the associate to approach and greet you first. React to however they open — if they are warm and professional, you respond with visible relief and immediately launch into your problem. If they seem distracted or give a flat generic greeting, you are slightly impatient from the start and less forthcoming.
 
 HOW YOU BEHAVE IN RESPONSE TO THE ASSOCIATE:
-- If the associate shows you only one ring at a time → you accept it but immediately ask to see another one too: "Great — but can I compare it with that one there?"
-- If the associate places two rings on the counter → you pick up the second one without asking: "Oh — can I hold both? I want to see them side by side."
-- If the associate leaves the case unlocked or steps away from it → you lean forward over the glass and point at pieces inside: "What about that one down there?"
-- If the associate is calm and in control → you gradually settle. You start asking more focused questions about the ring itself.
-- If the associate seems unsure or distracted → you get more demanding, not less. You push to see more pieces, faster.
+- If the associate shows you only one ring at a time — you accept it but immediately ask to see another one too: "Great — but can I compare it with that one there?"
+- If the associate places two rings on the counter — you pick up the second one without asking: "Oh — can I hold both? I want to see them side by side."
+- If the associate leaves the case unlocked or steps away from it — you lean forward over the glass and point at pieces inside: "What about that one down there?"
+- If the associate is calm and in control — you gradually settle. You start asking more focused questions about the ring itself.
+- If the associate seems unsure or distracted — you get more demanding, not less. You push to see more pieces, faster.
 
 WHAT YOU DO NOT KNOW:
 Another person has entered the area near your counter. You do not know this. You do not acknowledge her. You are entirely focused on the associate and the rings in front of you.
@@ -462,38 +414,6 @@ THE FOUR PROCEDURES YOU ARE SILENTLY TRACKING:
 2. Only one item of jewelry shown at a time.
 3. All jewelry kept on the display mat while being shown to a customer.
 4. Diamond tester used to verify any diamond before returning it to the case.`;
-
-const PROMPT_MANAGER = `You are Catherine Reeves, floor manager at Delany & Co. You have been in retail loss prevention for eleven years, the last four at Delany. You have just asked a sales associate to come to your office for a post-shift conversation after Valentine's Day.
-
-WHO YOU ARE:
-You are measured, precise, and genuinely interested in whether your staff understand their own performance — not just whether they followed the rules. You are not a disciplinarian. You are not a cheerleader. You are someone who has seen what happens when procedure breaks down — a piece goes missing, a claim gets filed, a career gets complicated — and you take the quiet work of prevention seriously.
-
-You have reviewed the CCTV footage from Counter 3 this afternoon. You know exactly what happened. You know what was done correctly and what was not. You are not here to deliver a verdict. You are here to find out whether the associate knows it too.
-
-YOUR VOICE:
-Calm, unhurried, specific. You do not fill silences. You do not soften difficult questions with preamble. You are not cold — you are simply focused.
-
-EXAMPLE OF HOW YOU SPEAK:
-"When you retrieved the first ring — walk me through what you did with the case."
-
-NEVER write like this:
-"I just want to say that overall I think you did a really good job today and I'm just going to ask you a few questions to help you reflect on your experience."
-
-HOW YOU CONDUCT THIS CONVERSATION:
-- You invite the associate to sit. You are not behind a desk — you are sitting across from them.
-- You ask one question at a time. You wait for a full answer before continuing.
-- Your questions are always specific — they reference a particular moment, a particular action, a particular customer.
-- If the answer is honest and accurate → acknowledge it briefly with a nod or a short phrase, then move to the next question.
-- If the answer is vague → narrow it: "Tell me specifically about that moment — what did you do with the case?"
-- If the answer deflects or avoids → return to it from a different angle. Patient but persistent.
-- After 4-5 exchanges, once the associate has had a genuine chance to reflect → offer a closing observation. Two sentences maximum. Name one thing handled well and one thing that must change. Direct, not harsh.
-- Never say "simulation", "exercise", "training", or "learning objective". This is a real post-shift conversation.
-- Never break character.
-
-THE GOAL OF THIS CONVERSATION:
-You want the associate to leave able to articulate — in their own words — what happened, what the risk was, and what they will do differently. A person who understands why a procedure exists is far less likely to skip it under pressure than one who simply memorised the rule.
-
-START: The associate has just come in. Invite them to sit with a brief, calm sentence. Then ask your first question — specific, grounded in what happened at Counter 3 today.`;
 
 const PROMPT_MANAGER = `You are Catherine Reeves, floor manager at Delany & Co. You have been in retail loss prevention for eleven years, the last four at Delany. You have just asked a sales associate to come to your office for a post-shift conversation after Valentine's Day.
 
@@ -515,10 +435,10 @@ HOW YOU CONDUCT THIS CONVERSATION:
 - You invite the associate to sit. You are not behind a desk — you are sitting across from them.
 - You ask one question at a time. You wait for a full answer before continuing. You do not fill silences.
 - Your questions are always specific — they reference a particular moment, a particular action, a particular customer. Never ask "how do you think it went overall?"
-- If the answer is honest and accurate → acknowledge it briefly with a short phrase, then move to the next question.
-- If the answer is vague → narrow it without confrontation: "Tell me specifically about that moment — what did you do with the case?"
-- If the answer deflects or avoids → return to it from a different angle. Patient but persistent. You always get there eventually.
-- After 4-5 exchanges, once the associate has genuinely reflected → offer a closing observation. Two sentences maximum. Name one thing handled well and one thing that must change next time. Direct, not harsh.
+- If the answer is honest and accurate — acknowledge it briefly with a short phrase, then move to the next question.
+- If the answer is vague — narrow it without confrontation: "Tell me specifically about that moment — what did you do with the case?"
+- If the answer deflects or avoids — return to it from a different angle. Patient but persistent. You always get there eventually.
+- After 4-5 exchanges, once the associate has genuinely reflected — offer a closing observation. Two sentences maximum. Name one thing handled well and one thing that must change next time. Direct, not harsh.
 - Never say "simulation", "exercise", "training", or "learning objective". This is a real post-shift conversation.
 - Never break character.
 
@@ -527,7 +447,6 @@ You want the associate to leave able to articulate — in their own words — wh
 
 START: The associate has just walked in. Invite them to sit with one brief, calm sentence. Then ask your first question — specific, grounded in a concrete moment at Counter 3 today.`;
 
-// ─── UTILS ───────────────────────────────────────────────────────────────────
 function esc(t) {
   const d = document.createElement('div');
   d.appendChild(document.createTextNode(t));
@@ -545,7 +464,7 @@ function goTo(id) {
 
 function autoResize(el) {
   el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  el.style.height = Math.min(el.scrollHeight, 216) + 'px';
 }
 
 function handleKey(e, phase) {
@@ -563,19 +482,13 @@ function getChatEl(phase) { return document.getElementById('chat-' + phase); }
 function setTyping(phase, on) {
   const el = getTypingEl(phase);
   el.className = 'typing-wrap' + (on ? ' visible' : '');
-  if (on) {
-    setTimeout(() => {
-      const c = getChatEl(phase);
-      c.scrollTop = c.scrollHeight;
-    }, 60);
-  }
+  if (on) setTimeout(() => { getChatEl(phase).scrollTop = getChatEl(phase).scrollHeight; }, 60);
 }
 
 function addMsg(phase, type, text, senderLabel) {
   const container = getChatEl(phase);
   const indicator = getTypingEl(phase);
   const wrap = document.createElement('div');
-
   if (type === 'system') {
     wrap.className = 'msg-wrap system';
     wrap.innerHTML = '<div class="msg-system">' + esc(text) + '</div>';
@@ -588,12 +501,10 @@ function addMsg(phase, type, text, senderLabel) {
     const sender = type === 'user' ? 'You' : senderLabel;
     wrap.innerHTML = '<div class="msg-sender">' + esc(sender) + '</div><div class="msg-bubble">' + esc(text) + '</div>';
   }
-
   container.insertBefore(wrap, indicator);
   setTimeout(() => { container.scrollTop = container.scrollHeight; }, 60);
 }
 
-// ─── API ──────────────────────────────────────────────────────────────────────
 async function callGemini(messages) {
   const res = await fetch('/.netlify/functions/gemini', {
     method: 'POST',
@@ -630,7 +541,6 @@ function getCharacterClass(phase) {
   if (phase === 'phase3') return 'manager';
 }
 
-// ─── PHASE LOGIC ──────────────────────────────────────────────────────────────
 async function startPhase(phase) {
   currentPhase = phase;
   setTyping(phase, true);
@@ -649,12 +559,10 @@ async function startPhase(phase) {
       systemPrompt: getPromptForPhase(phase),
       history: [{ role: 'user', parts: [{ text: 'Begin.' }] }]
     });
-
     histories[phase] = [
       { role: 'user', parts: [{ text: 'Begin.' }] },
       { role: 'model', parts: [{ text: response }] }
     ];
-
     setTyping(phase, false);
     parseAndRender(phase, response);
     setUI(phase, false);
@@ -678,7 +586,6 @@ async function sendMessage(phase) {
   addMsg(phase, 'user', text, 'You');
   histories[phase].push({ role: 'user', parts: [{ text: text }] });
   setTyping(phase, true);
-
   try {
     const response = await callGemini({
       systemPrompt: getPromptForPhase(phase),
@@ -691,7 +598,6 @@ async function sendMessage(phase) {
     setTyping(phase, false);
     addMsg(phase, 'system', 'Connection error: ' + e.message);
   }
-
   setUI(phase, false);
   document.getElementById('input-' + phase).focus();
 }
@@ -699,22 +605,17 @@ async function sendMessage(phase) {
 function parseAndRender(phase, text) {
   const senderLabel = getSenderLabel(phase);
   const charClass = getCharacterClass(phase);
-
-  // Split assessment note from main text
   const assessmentMatch = text.match(/\*\[Assessment:[^\]]*\]\*/);
   let mainText = text;
   let assessmentText = null;
-
   if (assessmentMatch) {
     mainText = text.replace(assessmentMatch[0], '').trim();
     assessmentText = assessmentMatch[0].replace(/\*/g, '').replace('[Assessment:', '').replace(']', '').trim();
   }
-
   if (mainText) addMsg(phase, charClass, mainText, senderLabel);
-  if (assessmentText) addMsg(phase, 'assessment', '↳ ' + assessmentText);
+  if (assessmentText) addMsg(phase, 'assessment', '\u21b3 ' + assessmentText);
 }
 
-// ─── TRANSITIONS ──────────────────────────────────────────────────────────────
 function startPhase1() {
   const btn = document.getElementById('begin-btn');
   btn.disabled = true;
@@ -735,20 +636,13 @@ function triggerTransition(target) {
   }
   goTo('screen-transition');
   setTimeout(() => {
-    if (target === 'customer') {
-      goTo('screen-phase2');
-      startPhase('phase2');
-    } else if (target === 'manager') {
-      goTo('screen-phase3');
-      startPhase('phase3');
-    }
+    if (target === 'customer') { goTo('screen-phase2'); startPhase('phase2'); }
+    else if (target === 'manager') { goTo('screen-phase3'); startPhase('phase3'); }
   }, 2800);
 }
 
-// ─── FINAL DEBRIEF ────────────────────────────────────────────────────────────
 async function generateFinalDebrief() {
   goTo('screen-debrief');
-
   const fullTranscript =
     'PHASE 1 — JORDAN (colleague briefing):\n' +
     histories.phase1.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n') +
@@ -757,16 +651,16 @@ async function generateFinalDebrief() {
     '\n\nPHASE 3 — MANAGER (post-shift review):\n' +
     histories.phase3.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n');
 
-  const debriefPrompt = `You are a loss prevention training evaluator at Delany & Co. Review the full simulation transcript below and produce a concise performance report.
+  const debriefPrompt = `You are a loss prevention training evaluator at Delany & Co. Review the full simulation transcript and produce a concise performance report.
 
-The four procedures being assessed are:
-1. Always lock and unlock the display case when removing and replacing items.
+The four procedures being assessed:
+1. Lock and unlock the display case every time an item is removed or replaced.
 2. Show only one item of jewelry at a time.
-3. Keep all jewelry on the display mat while showing it to a customer.
-4. Use the diamond tester to verify diamonds when removing or returning any item to the case.
+3. Keep all jewelry on the display mat while being shown to a customer.
+4. Use the diamond tester to verify any diamond before returning it to the case.
 
 Output ONLY this JSON, nothing else:
-{"well":["what the associate did well — be specific, max 3 points"],"missed":["what was missed or done incorrectly — be specific, reference the transcript, max 3 points"],"signals":["suspicious behaviours that were present in the scenario — name them clearly, max 3 points"],"expert":"A 2-3 sentence closing observation from an experienced loss prevention professional. Direct, honest, constructive."}
+{"well":["specific point, max 3"],"missed":["specific point referencing the transcript, max 3"],"signals":["suspicious behaviour present in the scenario, max 3"],"expert":"2-3 sentence closing observation. Direct, honest, constructive."}
 
 TRANSCRIPT:
 ${fullTranscript}`;
@@ -776,16 +670,10 @@ ${fullTranscript}`;
       systemPrompt: 'You are a loss prevention training evaluator. Output only valid JSON.',
       history: [{ role: 'user', parts: [{ text: debriefPrompt }] }]
     });
-
     const match = response.match(/\{[\s\S]*\}/);
-    if (match) {
-      renderDebrief(JSON.parse(match[0]));
-    } else {
-      renderDebrief({ well: ['Simulation completed.'], missed: ['Review your session carefully.'], signals: ['Multiple risk signals were present.'], expert: 'Review the full transcript and retake the simulation to improve your score.' });
-    }
-  } catch(e) {
-    renderDebrief({ well: ['Simulation completed.'], missed: ['Review your session carefully.'], signals: ['Multiple risk signals were present.'], expert: 'Review the full transcript and retake the simulation to improve your score.' });
-  }
+    if (match) { renderDebrief(JSON.parse(match[0])); return; }
+  } catch(e) {}
+  renderDebrief({ well: ['Simulation completed.'], missed: ['Review your session carefully.'], signals: ['Multiple risk signals were present.'], expert: 'Review the full transcript and retake the simulation to improve your score.' });
 }
 
 function renderDebrief(data) {
