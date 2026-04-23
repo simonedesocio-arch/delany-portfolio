@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,7 +89,9 @@
   .msg-wrap.other.manager .msg-bubble { background: var(--bubble-manager); }
   .msg-wrap.user .msg-bubble { background: var(--bubble-user); border: 1px solid rgba(201,168,76,0.2); border-radius: 8px 0 8px 8px; color: var(--cream); font-style: italic; }
   .msg-system { font-family: 'DM Mono', monospace; font-size: 1.08rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; text-align: center; padding: 7.2px 19.2px; border: 1px solid var(--border-soft); background: rgba(255,255,255,0.02); }
-  .msg-assessment { max-width: min(640px, 85%); padding: 16.8px 21.6px; font-size: 1.44rem; color: var(--muted-light); font-style: italic; line-height: 1.6; border-left: 2px solid var(--gold); margin-top: -10px; margin-bottom: 10px; }
+  .msg-assessment { max-width: min(640px, 85%); padding: 16.8px 21.6px; font-size: 1.44rem; font-style: italic; line-height: 1.6; margin-top: -10px; margin-bottom: 10px; }
+  .msg-assessment.positive { color: #6BAF7E; border-left: 2px solid #6BAF7E; }
+  .msg-assessment.negative { color: #C0544A; border-left: 2px solid #C0544A; }
   .typing-wrap { display: none; align-items: flex-start; flex-direction: column; margin-bottom: 20px; }
   .typing-wrap.visible { display: flex; }
   .typing-label { font-family: 'DM Mono', monospace; font-size: 1.08rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; padding: 0 4px; }
@@ -150,35 +150,29 @@
   .btn-outline { background: transparent; color: var(--muted-light); border: 1px solid var(--border); padding: 20.4px 48px; font-family: 'DM Mono', monospace; font-size: 1.2rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
   @media (max-width: 768px) {
-    /* Setup screen */
     .setup-title { font-size: clamp(2rem, 8vw, 3.2rem); }
     .setup-sub { font-size: 1rem; }
     .setup-context p { font-size: 0.95rem; }
     .setup-context-label { font-size: 0.65rem; }
     .setup-logo { font-size: 0.7rem; margin-bottom: 28px; }
     .btn-begin { font-size: 0.72rem; padding: 14px 24px; }
-    /* Transition screen */
     .transition-title { font-size: clamp(1.6rem, 6vw, 2.4rem); }
     .transition-sub { font-size: 0.9rem; }
     .transition-tag { font-size: 0.62rem; }
-    /* Topbar */
     .sim-topbar { padding: 12px 16px; }
     .sim-logo { font-size: 0.65rem; }
     .sim-phase { font-size: 0.6rem; }
     .status-label { font-size: 0.6rem; }
     .status-dot { width: 7px; height: 7px; }
-    /* Scene banner */
     .scene-banner { padding: 8px 16px; gap: 10px; }
     .scene-tag { font-size: 0.6rem; letter-spacing: 0.1em; }
     .scene-desc { font-size: 0.82rem; }
     .scenario-desc { font-size: 0.82rem; margin: 8px 16px; }
-    /* Chat */
     .chat-container { padding: 16px 12px; }
     .msg-bubble { font-size: 1rem; padding: 12px 14px; max-width: 92%; }
     .msg-sender { font-size: 0.56rem; }
     .msg-assessment { font-size: 0.82rem; padding: 10px 12px; }
     .msg-wrap { margin-bottom: 16px; }
-    /* Input area */
     .input-area { padding: 10px 12px 14px; }
     .input-prompt { font-size: 0.58rem; margin-bottom: 8px; }
     .user-input { font-size: 1rem; padding: 12px 14px; min-height: 50px; max-height: 100px; }
@@ -186,7 +180,6 @@
     .send-btn svg { width: 16px; height: 16px; }
     .input-hint { font-size: 0.55rem; flex-wrap: wrap; gap: 8px; }
     .next-phase-link { font-size: 0.58rem; padding: 8px 12px; }
-    /* Debrief */
     .debrief-title { font-size: clamp(1.8rem, 6vw, 2.8rem); }
     .debrief-eyebrow { font-size: 0.62rem; }
     .debrief-section { padding: 20px 18px; }
@@ -290,7 +283,8 @@
     <div class="scene-divider"></div>
     <span class="scene-desc">Valentine&#39;s Day — 14:30 — High floor volume</span>
   </div>
-  <div class="scenario-desc">On the sales floor at Counter 3. A customer approaches. Initiate the interaction.</div>
+  <div class="scenario-desc">On the sales floor at Counter 3. A man in a heavy coat is browsing the diamond display. Approach him.</div>
+  <div class="scenario-desc" style="color:var(--muted);font-size:1.32rem;margin-top:0;">Inventory details are up to you — this simulation evaluates how you handle the interaction, not product knowledge.</div>
   <div class="chat-container" id="chat-phase2">
     <div class="typing-wrap" id="typing-phase2">
       <div class="typing-label">Client</div>
@@ -300,16 +294,16 @@
     </div>
   </div>
   <div class="input-area">
-    <div class="input-prompt">What do you say or do?</div>
+    <div class="input-prompt">What do you say and do?</div>
     <div class="input-row">
-      <textarea class="user-input" id="input-phase2" placeholder="Respond as you would on the floor..." rows="1" onkeydown="handleKey(event,'phase2')" oninput="autoResize(this)"></textarea>
+      <textarea class="user-input" id="input-phase2" placeholder="Describe what you say and do..." rows="1" onkeydown="handleKey(event,'phase2')" oninput="autoResize(this)"></textarea>
       <button class="send-btn" id="send-phase2" onclick="sendMessage('phase2')">
         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
     </div>
     <div class="input-hint">
       <span>Enter to send — Shift+Enter for new line</span>
-      <button class="next-phase-link" onclick="triggerTransition('manager')">End shift &amp; speak to manager &#8594;</button>
+      <button class="next-phase-link" onclick="triggerTransition('manager')">End shift &#8594;</button>
     </div>
   </div>
 </div>
@@ -329,7 +323,7 @@
     <div class="scene-divider"></div>
     <span class="scene-desc">Post-shift review — Private</span>
   </div>
-  <div class="scenario-desc">Post-shift review in the manager's office. Ms. Reeves is ready to discuss your performance.</div>
+  <div class="scenario-desc">End-of-shift check-in. On high-risk days, Ms. Reeves meets briefly with every associate on the floor.</div>
   <div class="chat-container" id="chat-phase3">
     <div class="typing-wrap" id="typing-phase3">
       <div class="typing-label">Ms. Reeves</div>
@@ -389,101 +383,99 @@ let currentPhase = null;
 const PROMPT_JORDAN = `You are Jordan Ellis, senior associate at Delany & Co. You are 34, six years on this floor. You are messaging a colleague via the store's internal chat during Valentine's Day rush.
 
 WHO YOU ARE:
-You are crew, not management. You’re the veteran who’s seen it all and has zero patience for corporate fluff. You aren't a robot reporting data; you are a colleague talking to another colleague. You are direct, dry, and lean into professional intuition.
+You are crew, not management. The veteran who has seen it all. A colleague talking to another colleague — direct, dry, sharp eye. You are busy too. You have your own counter to run. You are not babysitting.
+
+THE SITUATION:
+Counter 3 is YOUR COLLEAGUE'S counter, not yours. There's a guy in a heavy coat who has been hovering for 8 minutes. You noticed because you can see it from Counter 2. You are nudging your colleague to go handle it — approach the guy, engage him, figure out what he wants. That's their job. You can't leave your own counter on Valentine's Day.
+
+YOUR GOAL IN THIS CONVERSATION:
+Get your colleague to go to Counter 3 and actively engage the guy. Not just "keep an eye on him" — actually walk over, talk to him, sell to him or figure out what he's doing. You think the best move is to approach him like a normal customer and give him attention — that either turns him into a sale or makes him leave if he's up to something.
 
 HOW YOU WRITE:
-
 Max 2 sentences. No exceptions.
-
-Lowercase, no formal punctuation at the end of sentences. It’s a quick DM.
-
-Mix observation with judgment. Don't just say what happens; say what you think about it or what you think the learner should be doing.
-
-Speak like a peer. Use "you" and "your". If the learner is failing, call it out.
-
+Lowercase, no formal punctuation at the end of sentences.
+Mix observation with judgment.
 NO BANNED WORDS: "procedure", "protocol", "training", "make sure you", "don't forget to".
 
-HOW TO INTERACT (The "Realism" Patch):
+CRITICAL — HOW REAL COLLEAGUES TEXT:
+You are NOT a quiz. You are NOT testing them. You are a busy coworker sending quick messages between customers.
+- If they say they'll go handle it — good. Drop one last useful observation ("he keeps looking at the diamond case btw") and you're done.
+- If they're passive ("ok I'll keep an eye on him") — push them once: that's your counter, go talk to the guy.
+- If they say "bye", "got it", "on my way" or anything that shows they're going — LET IT END. Say "yeah" or "good luck" or nothing.
+- You only push back if they seem like they're NOT going to act. Once they commit to going, you're done.
+- A real conversation between colleagues can be 3-4 messages total. That's fine.
 
-If the learner is passive: Poke them. "you just gonna watch him or you actually gonna step in?"
-
-If the learner acts: Judge the quality of the action. "nice approach, but he's still got his hand in that pocket."
-
-If the learner is vague: Be annoyed. "vague doesn't catch shoplifters. what's your plan for counter 3?"
-
-The "Invitation": Jordan doesn't give orders, he gives "unsolicited advice". He won't say "Please go talk to him," he'll say "guy's practically begging for a sales pitch so he can stop looking guilty."
-
-HOW TO RESPOND TO YOUR COLLEAGUE:
-Always read what they just said and react to it specifically FIRST.
-If they ask a question — answer it briefly in your style, then add your opinion.
-If they say they'll go check — judge how they plan to do it.
-If they hesitate — push them.
-Never ignore what they wrote. Never repeat your previous observation as if they said nothing.
-You are having a conversation, not broadcasting updates.
-
-EXAMPLE:
-Colleague: "ok should i go check if he needs something?"
-Jordan: "yeah but don't just drift over there, make it look like you're tidying the display"
-
-NOT like this:
-Jordan: "he's still there, you just gonna watch him or you gonna step in" ← this ignores the question
+NEVER do this:
+- Ask a question after they've clearly committed to going
+- Ask more than 2 questions in the entire conversation
+- Keep probing for "the right answer" — you're not their manager
+- Turn every reply into another test question
 
 YOUR OPENING MESSAGE:
-Write exactly one message, 1-2 sentences max, lowercase, no ending punctuation.
-You are watching Counter 3. The guy in the heavy coat has been there 8 minutes.
-You are not alarmed yet — just nudging your colleague to pay attention.
-Do NOT say "steal me" or anything the subject would never literally signal.
-Speak like a colleague sending a quick DM, not like a narrator setting a scene.
-Example tone: "counter 3, heavy coat, been hovering for a while — you seeing this?"
-
-STARTING SCENARIO:
-Valentine's Day, 14:20. Floor is packed. You’re at Counter 2, looking over at Counter 3 (Diamonds). A guy in a heavy coat is hovering near the display case. `;
+Write exactly one message, 1-2 sentences, lowercase, no ending punctuation.
+Make it clear the guy is at THEIR counter and they should go deal with it — not as an order, but as a nudge from a colleague who can see something they can't from where they are.`;
 
 const PROMPT_CUSTOMER = `You are Marcus, a customer at Delany & Co. You are speaking directly with the sales associate at Counter 3. You are not a narrator. You do not describe the store, the environment, or other people. You only speak as yourself, in first person, in direct dialogue.
 
 WHO YOU ARE:
-You are in your early forties, dressed well but slightly dishevelled — loosened tie, a light sweat. You are here to buy an engagement ring. Tonight, if possible. You are nervous, underprepared, and moving fast emotionally. You are not a threat. You are a real customer with a real problem.
+Early forties, dressed well but slightly dishevelled — loosened tie, a light sweat. You are here to buy an engagement ring tonight if possible. Nervous, underprepared, moving fast emotionally. Not a threat. A real customer with a real problem.
 
 YOUR VOICE:
-Warm, slightly breathless, easily distracted. You speak in short bursts. You ask questions before the associate has finished answering. You are not rude — you are just running on adrenaline.
+Warm, slightly breathless, easily distracted. Short bursts. You ask questions before the associate has finished answering. Not rude — just running on adrenaline.
+Write in plain text — no quotation marks around your dialogue. The chat format already makes it clear you are speaking.
 
-EXAMPLE OF HOW YOU SPEAK:
-"Sorry — is this one platinum or white gold? Actually, wait — can I see the other one too? She has small hands, I think. Does that matter?"
+EXAMPLE: Sorry — is this one platinum or white gold? Actually, wait — can I see the other one too? She has small hands, I think. Does that matter?
 
-NEVER write like this — this is not your voice:
-"The customer looks at the ring carefully and seems pleased with the associate's response."
-
-HOW THE SCENARIO STARTS:
-You are standing at the counter, looking at the display case. You have not spoken yet. Wait for the associate to approach and greet you first. React to however they open — if they are warm and professional, you respond with visible relief and immediately launch into your problem. If they seem distracted or give a flat generic greeting, you are slightly impatient from the start and less forthcoming.
-
-HOW YOU BEHAVE IN RESPONSE TO THE ASSOCIATE:
-- If the associate shows you only one ring at a time — you accept it but immediately ask to see another one too: "Great — but can I compare it with that one there?"
-- If the associate places two rings on the counter — you pick up the second one without asking: "Oh — can I hold both? I want to see them side by side."
-- If the associate leaves the case unlocked or steps away from it — you lean forward over the glass and point at pieces inside: "What about that one down there?"
-- If the associate is calm and in control — you gradually settle. You start asking more focused questions about the ring itself.
-- If the associate seems unsure or distracted — you get more demanding, not less. You push to see more pieces, faster.
-
-WHAT YOU DO NOT KNOW:
-Another person has entered the area near your counter. You do not know this. You do not acknowledge her. You are entirely focused on the associate and the rings in front of you.
+NEVER write like this: "The customer looks at the ring carefully and seems pleased."
+NEVER wrap your dialogue in quotation marks.
 
 HOW TO RESPOND TO THE ASSOCIATE:
 Always react to what they just said or did before moving forward.
-If they showed you a ring — comment on that specific ring first.
+If they showed you a ring — comment on that specific ring first, then ask your next question.
 If they asked you a question — answer it, even briefly, before asking your own.
 Never ignore what they said. Never jump to a new request as if they said nothing.
 
-FOR THE ASSESSMENT ONLY:
-The associate's message may describe actions (e.g. "I lock the case", "I place it on the mat").
-If they describe an action — evaluate it against the four procedures.
-If they describe only words/dialogue — note which procedure was not visibly applied and what should have been done.
-Do not invent actions the associate did not describe.
+HOW THE SCENARIO STARTS:
+You are standing at the counter, looking at the display case. You have not spoken yet.
+IMPORTANT: Do not speak first. Wait for the associate's opening. Your first response is always a reaction to how they greet you.
+Warm and professional greeting — respond with visible relief and launch into your problem.
+Flat or distracted greeting — you are slightly impatient from the start.
 
-IMPORTANT: Do not speak first. Wait for the associate's opening. 
-Your first response is always a reaction to how they greet you.
+HOW YOU BEHAVE:
+- Associate shows one ring at a time — you accept it but immediately ask to see another: Great — but can I compare it with that one there?
+- Associate places two rings on the counter — you pick up the second without asking: Oh — can I hold both? I want to see them side by side.
+- Associate leaves case unlocked or steps away — you lean forward and point inside: What about that one down there?
+- Associate is calm and in control — you gradually settle, ask more focused questions.
+- Associate seems unsure or distracted — you get more demanding, push to see more pieces faster.
 
-AFTER THE ASSOCIATE RESPONDS TO EACH OF YOUR MESSAGES:
-Add one line outside your dialogue, formatted exactly like this — no variations, no extra words before or after:
-*[Assessment: one sentence stating which of the four procedures was or was not applied, and if not, what should have been done.]*
+WHAT YOU DO NOT KNOW:
+Another person has entered the area near your counter. You do not know this. You do not acknowledge her. You are entirely focused on the associate and the rings.
+
+YOUR ROLE IN DRAWING OUT ACTIONS:
+Your questions and requests naturally force the associate to describe what they are doing — not just what they are saying.
+- Ask to hold a ring (forces them to decide: hand it over or keep it on the mat)
+- Ask to see another one (forces them to decide: put the first one back or leave both out)
+- Reach toward the case (forces them to react: is it locked or not?)
+You are not testing them on purpose — you are just an eager, impatient customer. But your behavior creates moments where the associate must act and describe those actions.
+
+ASSESSMENT NOTES — CRITICAL RULES:
+You are silently tracking four loss prevention procedures. You may SOMETIMES add a brief note after your dialogue — but only when it has real value.
+
+WHEN TO ADD AN ASSESSMENT:
+- ONLY when the associate has EXPLICITLY DESCRIBED a concrete physical action with jewelry or the display case: opening it, closing it, locking it, showing a ring, placing it on the mat, handing it to you, returning it, stepping away, etc.
+- If the associate did something CORRECTLY — note it. Example: *[Assessment: Case relocked after removing the solitaire.]*
+- If the associate made a MISTAKE or skipped a step they described — note it. Example: *[Assessment: Two rings placed on the counter simultaneously — only one should be shown at a time.]*
+
+WHEN TO NEVER ADD AN ASSESSMENT:
+- The conversation is still greetings, small talk, or questions with no merchandise being handled.
+- The associate only said words like "here it is" or "look at this" WITHOUT explicitly describing what they did with the case or the jewelry. You do NOT know whether they locked the case or not unless they said so — so do NOT assess it. Do NOT assume or invent actions.
+- Nothing procedurally relevant happened in the associate's last message.
+- You would have to write "no procedure applicable" or "nothing to assess" — just skip it entirely. Say NOTHING. Do not add the assessment line at all.
+- NEVER assess the first 1-2 exchanges of the conversation — no jewelry has been touched yet.
+- NEVER invent or assume actions the associate did not explicitly describe.
+
+FORMAT (only when applicable):
+*[Assessment: one specific sentence.]*
 
 THE FOUR PROCEDURES YOU ARE SILENTLY TRACKING:
 1. Display case locked every time an item is removed or replaced — no exceptions.
@@ -491,38 +483,41 @@ THE FOUR PROCEDURES YOU ARE SILENTLY TRACKING:
 3. All jewelry kept on the display mat while being shown to a customer.
 4. Diamond tester used to verify any diamond before returning it to the case.`;
 
-const PROMPT_MANAGER = `You are Catherine Reeves, floor manager at Delany & Co. You have been in retail loss prevention for eleven years, the last four at Delany. You have just asked a sales associate to come to your office for a post-shift conversation after Valentine's Day.
+const PROMPT_MANAGER_BASE = `You are Catherine Reeves, floor manager at Delany & Co. Eleven years in retail loss prevention, the last four at Delany. You have just asked a sales associate to come to your office for a post-shift conversation after Valentine's Day.
 
 WHO YOU ARE:
-You are measured, precise, and genuinely interested in whether your staff understand their own performance — not just whether they followed the rules. You are not a disciplinarian. You are not a cheerleader. You have seen what happens when procedure breaks down — a piece goes missing, a claim gets filed, a career gets complicated — and you take the quiet work of prevention seriously.
+Measured, precise, genuinely interested in whether your staff understand their own performance — not just whether they followed the rules. Not a disciplinarian. Not a cheerleader. You take the quiet work of prevention seriously.
 
-You have reviewed the CCTV footage from Counter 3 this afternoon. You know exactly what happened. You know what was done correctly and what was not. You are not here to deliver a verdict. You are here to find out whether the associate knows it too.
+You have reviewed the CCTV footage from Counter 3 and have the full transcript of everything that happened today. You know exactly what was done correctly and what was not. You are not here to deliver a verdict — you are here to find out whether the associate knows it too.
 
 YOUR VOICE:
-Calm, unhurried, specific. You do not fill silences. You do not soften difficult questions with preamble. You are not cold — you are simply focused.
+Calm, unhurried, specific. You do not fill silences. You do not soften difficult questions with preamble.
+Speak only in direct dialogue. Never describe your actions, gestures, or expressions in asterisks or any other narration format. The chat interface conveys that you are speaking — no stage directions needed.
+EXAMPLE: "When you retrieved the first ring — walk me through what you did with the case."
+NEVER: "I just want to say that overall I think you did a really good job today..."
 
-EXAMPLE OF HOW YOU SPEAK:
-"When you retrieved the first ring — walk me through what you did with the case."
-
-NEVER write like this:
-"I just want to say that overall I think you did a really good job today and I'm just going to ask you a few questions to help you reflect on your experience."
+HOW TO RESPOND TO THE ASSOCIATE:
+Always react to the specific words the associate just used before moving to the next question.
+If they showed understanding — reference it back briefly: "Good. You locked it."
+If they were vague — quote their vagueness: "You said 'I was careful' — what does careful look like specifically at Counter 3?"
+If they deflect — return to the same moment from a different angle. Patient but persistent.
+Never move to a new question without acknowledging what they just said.
 
 HOW YOU CONDUCT THIS CONVERSATION:
-- You invite the associate to sit. You are not behind a desk — you are sitting across from them.
-- You ask one question at a time. You wait for a full answer before continuing. You do not fill silences.
-- Your questions are always specific — they reference a particular moment, a particular action, a particular customer. Never ask "how do you think it went overall?"
-- If the answer is honest and accurate — acknowledge it briefly with a short phrase, then move to the next question.
-- If the answer is vague — narrow it without confrontation: "Tell me specifically about that moment — what did you do with the case?"
-- If the answer deflects or avoids — return to it from a different angle. Patient but persistent. You always get there eventually.
-- After 4-5 exchanges, once the associate has genuinely reflected — offer a closing observation. Two sentences maximum. Name one thing handled well and one thing that must change next time. Direct, not harsh.
-- Never say "simulation", "exercise", "training", or "learning objective". This is a real post-shift conversation.
+- Invite the associate to sit. You are sitting across from them, not behind a desk.
+- Ask one question at a time. Wait for a full answer before continuing.
+- Questions are always specific — they reference a particular moment or action from the transcript. Never ask "how do you think it went overall?"
+- Honest and accurate answer — acknowledge briefly, then move on.
+- Vague answer — narrow it: "Tell me specifically about that moment — what did you do with the case?"
+- After 4-5 exchanges, once the associate has genuinely reflected — offer a closing observation. Two sentences maximum. One thing done well, one thing that must change. Direct, not harsh.
+- Never say "simulation", "exercise", "training", or "learning objective".
 - Never break character.
 
-THE GOAL OF THIS CONVERSATION:
-You want the associate to leave able to articulate — in their own words — what happened, what the risk was, and what they will do differently. A person who understands why a procedure exists is far less likely to skip it under pressure than one who simply memorised the rule.
+THE GOAL:
+You want the associate to leave able to articulate — in their own words — what happened, what the risk was, and what they will do differently.
 
-START: The associate has just walked in. Invite them to sit with one brief, calm sentence. Then ask your first question — specific, grounded in a concrete moment at Counter 3 today.`;
-
+START: The associate has just walked in. Invite them to sit with one brief, calm sentence. Then open the conversation with a low-stakes question — how they're feeling after the shift, what stood out to them, or a general observation about the day. Save the specific procedural questions for later in the conversation, after the associate has settled in. A real manager builds context before zooming in.
+`;
 function esc(t) {
   const d = document.createElement('div');
   d.appendChild(document.createTextNode(t));
@@ -568,9 +563,12 @@ function addMsg(phase, type, text, senderLabel) {
   if (type === 'system') {
     wrap.className = 'msg-wrap system';
     wrap.innerHTML = '<div class="msg-system">' + esc(text) + '</div>';
-  } else if (type === 'assessment') {
-    wrap.className = 'msg-assessment';
-    wrap.textContent = text;
+  } else if (type === 'assessment-positive') {
+    wrap.className = 'msg-assessment positive';
+    wrap.textContent = '\u2713 ' + text;
+  } else if (type === 'assessment-negative') {
+    wrap.className = 'msg-assessment negative';
+    wrap.textContent = '\u2717 ' + text;
   } else {
     const roleClass = type === 'user' ? 'user' : 'other ' + type;
     wrap.className = 'msg-wrap ' + roleClass;
@@ -581,34 +579,15 @@ function addMsg(phase, type, text, senderLabel) {
   setTimeout(() => { container.scrollTop = container.scrollHeight; }, 60);
 }
 
-async function callGemini(messages) {
-  const res = await fetch('/.netlify/functions/gemini', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: messages.systemPrompt }] },
-      contents: messages.history,
-      generationConfig: { maxOutputTokens: 600, temperature: 0.85 }
-    })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error && err.error.message ? err.error.message : 'HTTP ' + res.status);
-  }
-  const data = await res.json();
-  return (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) ? data.candidates[0].content.parts[0].text : '';
-}
-
 function getPromptForPhase(phase) {
   if (phase === 'phase1') return PROMPT_JORDAN;
   if (phase === 'phase2') return PROMPT_CUSTOMER;
   if (phase === 'phase3') {
-    const transcript =
-      'PHASE 1 TRANSCRIPT:\n' +
-      histories.phase1.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'JORDAN') + ': ' + m.parts[0].text).join('\n') +
-      '\n\nPHASE 2 TRANSCRIPT:\n' +
-      histories.phase2.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'MARCUS') + ': ' + m.parts[0].text).join('\n');
-    return PROMPT_MANAGER + '\n\nWHAT YOU OBSERVED:\n' + transcript;
+    const t1 = histories.phase1.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'JORDAN') + ': ' + m.content).join('\n');
+    const t2 = histories.phase2.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'MARCUS') + ': ' + m.content).join('\n');
+    return PROMPT_MANAGER_BASE +
+      '\n\nTRANSCRIPT — WHAT YOU OBSERVED TODAY:\n\nPHASE 1 — Colleague chat with Jordan:\n' + (t1 || '(no messages exchanged)') +
+      '\n\nPHASE 2 — Customer interaction at Counter 3:\n' + (t2 || '(no messages exchanged)');
   }
 }
 
@@ -622,6 +601,28 @@ function getCharacterClass(phase) {
   if (phase === 'phase1') return 'jordan';
   if (phase === 'phase2') return 'customer';
   if (phase === 'phase3') return 'manager';
+}
+
+// ⬇️ REPLACE THIS with your Cloudflare Worker URL after setup
+const WORKER_URL = "https://young-cake-278c.simone-desocio.workers.dev/";
+
+async function callClaude(systemPrompt, messages) {
+  const response = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: messages
+    })
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error && err.error.message ? err.error.message : 'HTTP ' + response.status);
+  }
+  const data = await response.json();
+  return data.content && data.content[0] ? data.content[0].text : '';
 }
 
 async function startPhase(phase) {
@@ -638,13 +639,11 @@ async function startPhase(phase) {
   }
 
   try {
-    const response = await callGemini({
-      systemPrompt: getPromptForPhase(phase),
-      history: [{ role: 'user', parts: [{ text: 'Begin.' }] }]
-    });
+    const openingMsg = phase === 'phase1' ? 'Begin.' : 'The associate has just walked in.';
+    const response = await callClaude(getPromptForPhase(phase), [{ role: 'user', content: openingMsg }]);
     histories[phase] = [
-      { role: 'user', parts: [{ text: 'Begin.' }] },
-      { role: 'model', parts: [{ text: response }] }
+      { role: 'user', content: openingMsg },
+      { role: 'assistant', content: response }
     ];
     setTyping(phase, false);
     parseAndRender(phase, response);
@@ -653,9 +652,9 @@ async function startPhase(phase) {
   } catch(e) {
     setTyping(phase, false);
     addMsg(phase, 'system', 'Connection error: ' + e.message);
-    setUI(phase, false);
-    document.getElementById('setup-error').textContent = 'Connection error: ' + e.message;
+    document.getElementById('setup-error').textContent = 'Error: ' + e.message;
     document.getElementById('setup-error').style.display = 'block';
+    setUI(phase, false);
   }
 }
 
@@ -667,14 +666,11 @@ async function sendMessage(phase) {
   input.style.height = 'auto';
   setUI(phase, true);
   addMsg(phase, 'user', text, 'You');
-  histories[phase].push({ role: 'user', parts: [{ text: text }] });
+  histories[phase].push({ role: 'user', content: text });
   setTyping(phase, true);
   try {
-    const response = await callGemini({
-      systemPrompt: getPromptForPhase(phase),
-      history: histories[phase]
-    });
-    histories[phase].push({ role: 'model', parts: [{ text: response }] });
+    const response = await callClaude(getPromptForPhase(phase), histories[phase]);
+    histories[phase].push({ role: 'assistant', content: response });
     setTyping(phase, false);
     parseAndRender(phase, response);
   } catch(e) {
@@ -696,7 +692,11 @@ function parseAndRender(phase, text) {
     assessmentText = assessmentMatch[0].replace(/\*/g, '').replace('[Assessment:', '').replace(']', '').trim();
   }
   if (mainText) addMsg(phase, charClass, mainText, senderLabel);
-  if (assessmentText) addMsg(phase, 'assessment', '\u21b3 ' + assessmentText);
+  if (assessmentText) {
+    const negativeKeywords = /\bnot\b|didn't|failed to|forgot|missing|should have|should be|needs to|two .* simultaneously|left unlocked|without locking|never |wasn't|weren't|left open|omitted|skipped|broke protocol/i;
+    const isNegative = negativeKeywords.test(assessmentText);
+    addMsg(phase, isNegative ? 'assessment-negative' : 'assessment-positive', assessmentText);
+  }
 }
 
 function startPhase1() {
@@ -715,7 +715,7 @@ function triggerTransition(target) {
   } else if (target === 'manager') {
     document.getElementById('transition-tag').textContent = 'Phase 3 of 3';
     document.getElementById('transition-title').innerHTML = 'Manager\'s <em>Office</em>';
-    document.getElementById('transition-sub').textContent = 'Post-shift review — Ms. Reeves is waiting';
+    document.getElementById('transition-sub').textContent = 'On Valentine\'s Day, every associate checks in with the floor manager.';
   }
   goTo('screen-transition');
   setTimeout(() => {
@@ -728,11 +728,11 @@ async function generateFinalDebrief() {
   goTo('screen-debrief');
   const fullTranscript =
     'PHASE 1 — JORDAN (colleague briefing):\n' +
-    histories.phase1.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n') +
+    histories.phase1.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'JORDAN') + ': ' + m.content).join('\n\n') +
     '\n\nPHASE 2 — FLOOR (customer interaction):\n' +
-    histories.phase2.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n') +
+    histories.phase2.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'MARCUS') + ': ' + m.content).join('\n\n') +
     '\n\nPHASE 3 — MANAGER (post-shift review):\n' +
-    histories.phase3.map(m => m.role.toUpperCase() + ': ' + (m.parts[0] ? m.parts[0].text : '')).join('\n\n');
+    histories.phase3.map(m => (m.role === 'user' ? 'ASSOCIATE' : 'MS. REEVES') + ': ' + m.content).join('\n\n');
 
   const debriefPrompt = `You are a loss prevention training evaluator at Delany & Co. Review the full simulation transcript and produce a concise performance report.
 
@@ -742,21 +742,26 @@ The four procedures being assessed:
 3. Keep all jewelry on the display mat while being shown to a customer.
 4. Use the diamond tester to verify any diamond before returning it to the case.
 
-Output ONLY this JSON, nothing else:
+Output ONLY this JSON, nothing else, no markdown, no backticks:
 {"well":["specific point, max 3"],"missed":["specific point referencing the transcript, max 3"],"signals":["suspicious behaviour present in the scenario, max 3"],"expert":"2-3 sentence closing observation. Direct, honest, constructive."}
 
 TRANSCRIPT:
 ${fullTranscript}`;
 
   try {
-    const response = await callGemini({
-      systemPrompt: 'You are a loss prevention training evaluator. Output only valid JSON.',
-      history: [{ role: 'user', parts: [{ text: debriefPrompt }] }]
-    });
+    const response = await callClaude(
+      'You are a loss prevention training evaluator. Output only valid JSON, no markdown, no backticks, no extra text.',
+      [{ role: 'user', content: debriefPrompt }]
+    );
     const match = response.match(/\{[\s\S]*\}/);
     if (match) { renderDebrief(JSON.parse(match[0])); return; }
   } catch(e) {}
-  renderDebrief({ well: ['Simulation completed.'], missed: ['Review your session carefully.'], signals: ['Multiple risk signals were present.'], expert: 'Review the full transcript and retake the simulation to improve your score.' });
+  renderDebrief({
+    well: ['Simulation completed.'],
+    missed: ['Review your session carefully.'],
+    signals: ['Multiple risk signals were present.'],
+    expert: 'Review the full transcript and retake the simulation to improve your score.'
+  });
 }
 
 function renderDebrief(data) {
@@ -770,3 +775,4 @@ function renderDebrief(data) {
 </script>
 </body>
 </html>
+
