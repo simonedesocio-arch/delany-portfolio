@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Delany &amp; Co. — Loss Prevention Simulation</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -24,6 +24,8 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; font-family: 'Cormorant Garamond', Georgia, serif; background: var(--charcoal); color: var(--cream); overflow: hidden; }
+  html { height: -webkit-fill-available; }
+  body { min-height: -webkit-fill-available; }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
   .screen { display: none; position: fixed; inset: 0; z-index: 1; animation: screenIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
   .screen.active { display: flex; flex-direction: column; }
@@ -53,7 +55,7 @@
   .transition-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s infinite; }
   .transition-dot:nth-child(2) { animation-delay: 0.2s; }
   .transition-dot:nth-child(3) { animation-delay: 0.4s; }
-  .sim-screen { flex-direction: column; height: 100vh; overflow: hidden; }
+  .sim-screen { flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
   .sim-topbar { display: flex; align-items: center; justify-content: space-between; padding: 24px 48px; border-bottom: 1px solid var(--border-soft); background: rgba(17,17,17,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
   .sim-logo { font-family: 'DM Mono', monospace; font-size: 1.2rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; }
   .sim-phase { font-family: 'DM Mono', monospace; font-size: 1.14rem; letter-spacing: 0.15em; color: var(--muted-light); text-transform: uppercase; }
@@ -173,7 +175,7 @@
     .msg-sender { font-size: 0.56rem; }
     .msg-assessment { font-size: 0.82rem; padding: 10px 12px; }
     .msg-wrap { margin-bottom: 16px; }
-    .input-area { padding: 10px 12px 14px; }
+    .input-area { padding: 10px 12px 14px; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
     .input-prompt { font-size: 0.58rem; margin-bottom: 8px; }
     .user-input { font-size: 1rem; padding: 12px 14px; min-height: 50px; max-height: 100px; }
     .send-btn { height: 50px; padding: 12px 16px; }
