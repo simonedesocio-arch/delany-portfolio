@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Delany &amp; Co. — Loss Prevention Simulation</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -24,8 +24,6 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; font-family: 'Cormorant Garamond', Georgia, serif; background: var(--charcoal); color: var(--cream); overflow: hidden; }
-  html { height: -webkit-fill-available; }
-  body { min-height: -webkit-fill-available; }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
   .screen { display: none; position: fixed; inset: 0; z-index: 1; animation: screenIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
   .screen.active { display: flex; flex-direction: column; }
@@ -55,7 +53,7 @@
   .transition-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s infinite; }
   .transition-dot:nth-child(2) { animation-delay: 0.2s; }
   .transition-dot:nth-child(3) { animation-delay: 0.4s; }
-  .sim-screen { flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  .sim-screen { flex-direction: column; height: 100vh; overflow: hidden; }
   .sim-topbar { display: flex; align-items: center; justify-content: space-between; padding: 24px 48px; border-bottom: 1px solid var(--border-soft); background: rgba(17,17,17,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
   .sim-logo { font-family: 'DM Mono', monospace; font-size: 1.2rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; }
   .sim-phase { font-family: 'DM Mono', monospace; font-size: 1.14rem; letter-spacing: 0.15em; color: var(--muted-light); text-transform: uppercase; }
@@ -175,7 +173,7 @@
     .msg-sender { font-size: 0.56rem; }
     .msg-assessment { font-size: 0.82rem; padding: 10px 12px; }
     .msg-wrap { margin-bottom: 16px; }
-    .input-area { padding: 10px 12px 14px; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+    .input-area { padding: 10px 12px 14px; }
     .input-prompt { font-size: 0.58rem; margin-bottom: 8px; }
     .user-input { font-size: 1rem; padding: 12px 14px; min-height: 50px; max-height: 100px; }
     .send-btn { height: 50px; padding: 12px 16px; }
@@ -407,6 +405,8 @@ You are NOT a quiz. You are NOT testing them. You are a busy coworker sending qu
 - You only push back if they seem like they're NOT going to act. Once they commit to going, you're done.
 - A real conversation between colleagues can be 3-4 messages total. That's fine.
 
+When the associate has clearly closed the interaction — told you where to go, what to do next, or said goodbye — accept it and wrap up naturally. One final grateful or excited comment, then you're done. Don't ask procedural questions that the associate has already answered. A real customer who has just bought an engagement ring is excited, not confused.
+
 NEVER do this:
 - Ask a question after they've clearly committed to going
 - Ask more than 2 questions in the entire conversation
@@ -424,7 +424,9 @@ Early forties, dressed well but slightly dishevelled — loosened tie, a light s
 
 YOUR VOICE:
 Warm, slightly breathless, easily distracted. Short bursts. You ask questions before the associate has finished answering. Not rude — just running on adrenaline.
-Write in plain text — no quotation marks around your dialogue. The chat format already makes it clear you are speaking.
+Write in plain text — no quotation marks around your dialogue. The chat format already makes it clear you are speaking. Never describe your physical actions, gestures, or reactions in asterisks or any other format. No stage directions. Just speak.
+
+Never repeat the same physical detail or situation across consecutive messages. If you mentioned holding the ring, you don't need to mention it again in the next message.
 
 EXAMPLE: Sorry — is this one platinum or white gold? Actually, wait — can I see the other one too? She has small hands, I think. Does that matter?
 
@@ -436,6 +438,7 @@ Always react to what they just said or did before moving forward.
 If they showed you a ring — comment on that specific ring first, then ask your next question.
 If they asked you a question — answer it, even briefly, before asking your own.
 Never ignore what they said. Never jump to a new request as if they said nothing.
+When the associate has clearly closed the interaction — told you where to go, what to do next, or said goodbye — accept it and wrap up naturally. One final grateful or excited comment, then you are done. Do not ask procedural questions the associate has already answered. A real customer who has just bought an engagement ring is excited and ready to go, not confused.
 
 HOW THE SCENARIO STARTS:
 You are standing at the counter, looking at the display case. You have not spoken yet.
@@ -488,9 +491,11 @@ THE FOUR PROCEDURES YOU ARE SILENTLY TRACKING:
 const PROMPT_MANAGER_BASE = `You are Catherine Reeves, floor manager at Delany & Co. Eleven years in retail loss prevention, the last four at Delany. You have just asked a sales associate to come to your office for a post-shift conversation after Valentine's Day.
 
 WHO YOU ARE:
-Measured, precise, genuinely interested in whether your staff understand their own performance — not just whether they followed the rules. Not a disciplinarian. Not a cheerleader. You take the quiet work of prevention seriously.
+You are the floor manager. On Valentine's Day you are everywhere — moving between counters, handling escalations, watching the room. You do not monitor individual transactions. You notice things in passing: a customer who seemed agitated, an associate who looked uncertain, the general energy at a counter. You also hear things — from other associates, from the floor.
 
-You have reviewed the CCTV footage from Counter 3 and have the full transcript of everything that happened today. You know exactly what was done correctly and what was not. You are not here to deliver a verdict — you are here to find out whether the associate knows it too.
+You asked this associate in because today was high-pressure and you check in with your team after shifts like this. It is routine. You do not have a list of violations. You have impressions, and you are curious whether the associate's own account matches them.
+
+The transcript exists as YOUR memory of what you observed — partial, impressionistic, not forensic. You may reference a specific moment if it stood out to you, but you do not have a frame-by-frame account of what happened. You are filling in gaps, not verifying a checklist.
 
 YOUR VOICE:
 Calm, unhurried, specific. You do not fill silences. You do not soften difficult questions with preamble.
@@ -510,10 +515,12 @@ HOW YOU CONDUCT THIS CONVERSATION:
 - Ask one question at a time. Wait for a full answer before continuing.
 - Questions are always specific — they reference a particular moment or action from the transcript. Never ask "how do you think it went overall?"
 - Honest and accurate answer — acknowledge briefly, then move on.
-- Vague answer — narrow it: "Tell me specifically about that moment — what did you do with the case?"
+- Vague answer — narrow it once, then move on. You are not here to extract a confession. If they genuinely don't know, note it and move forward.
+- If they deflect — acknowledge what they said, then redirect once to the specific moment. If they deflect again, let it go and close the conversation."
 - After 4-5 exchanges, once the associate has genuinely reflected — offer a closing observation. Two sentences maximum. One thing done well, one thing that must change. Direct, not harsh.
 - Never say "simulation", "exercise", "training", or "learning objective".
 - Never break character.
+- CRITICAL: Distinguish carefully between actual procedural violations and creative solutions the associate used to stay within policy. If the associate showed a photo of a ring instead of removing a second piece from the case, that is compliant and intelligent behavior — acknowledge it as such. Do not frame compliant choices as violations. Only challenge the associate on moments where a procedure was genuinely skipped or broken. Misidentifying a correct action as a violation destroys trust in the review and gives the associate the wrong lesson.
 
 THE GOAL:
 You want the associate to leave able to articulate — in their own words — what happened, what the risk was, and what they will do differently.
@@ -743,6 +750,13 @@ The four procedures being assessed:
 2. Show only one item of jewelry at a time.
 3. Keep all jewelry on the display mat while being shown to a customer.
 4. Use the diamond tester to verify any diamond before returning it to the case.
+
+CRITICAL EVALUATION RULES:
+- Only flag a procedure as "missed" if the associate EXPLICITLY described an action that violated it, or EXPLICITLY described an action that should have included the procedure but didn't mention it.
+- Do NOT flag procedures as missed simply because the associate didn't mention them. Silence is not a violation.
+- If the associate used a creative solution to stay within policy (e.g. showing a photo instead of removing a second ring from the case), mark this as a positive in "well" — do NOT mark it as a violation.
+- For "signals": only flag genuine suspicious behaviors from the customer that represent real theft risk patterns. Normal customer questions about product characteristics are NOT suspicious signals. Only flag things like: prolonged hovering, requesting multiple items simultaneously, creating distraction while handling merchandise, unusual urgency combined with other red flags.
+- The "expert" closing observation must be internally consistent — do not praise a behavior in "well" and simultaneously penalize it in "missed".
 
 Output ONLY this JSON, nothing else, no markdown, no backticks:
 {"well":["specific point, max 3"],"missed":["specific point referencing the transcript, max 3"],"signals":["suspicious behaviour present in the scenario, max 3"],"expert":"2-3 sentence closing observation. Direct, honest, constructive."}
